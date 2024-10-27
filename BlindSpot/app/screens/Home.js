@@ -63,22 +63,21 @@ const styles = StyleSheet.create({
         backgroundColor: '#E4D8EB',
     },
     header: {
-        height: Math.min(80, Dimensions.get('window').height * 0.1),
+        height: Math.min(42, Dimensions.get('window').height * 0.05),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-around',
         marginHorizontal: 20,
-        marginBottom: 15,
+        marginBottom: 5,
     },
     headerBox: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%',
-        marginTop: 30,
     },
     headerText: {
-        fontSize: 20,
+        fontSize: 15,
         color: 'black',
     },
     profileButton: {

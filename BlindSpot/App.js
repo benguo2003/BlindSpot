@@ -2,8 +2,8 @@ import 'react-native-gesture-handler';
 import { StyleSheet, View, StatusBar as RNStatusBar, SafeAreaView} from 'react-native';
 import React, { useState } from 'react';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
-import AppNavigator from './Navigator';
-import { AppProvider } from '../contexts/appContext';
+import AppNavigator from './app/Navigator';
+import { AppProvider } from './contexts/appContext';
 
 export default function App() {
     const [userEmail, setUserEmail] = useState(null);
@@ -13,10 +13,10 @@ export default function App() {
     return (
         <AppProvider value={{ userEmail, setUserEmail, userID, setUserID }}>
             <NavigationContainer>
-                <View style={styles.fullScreenContainer}>
-                    <RNStatusBar hidden />
+                <SafeAreaView style={styles.container}>
+                    <RNStatusBar style="auto" />
                     <AppNavigator />
-                </View>
+                </SafeAreaView>
             </NavigationContainer>
         </AppProvider>
     );
@@ -25,7 +25,7 @@ export default function App() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#E4D8EB',
     },
     fullScreenContainer: {
         flex: 1,
