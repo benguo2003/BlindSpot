@@ -1,47 +1,61 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Image, Dimensions, TextInput, Button, StyleSheet, Alert, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator, Touchable } from 'react-native';
+import { View, Image, Dimensions, TextInput, Button, StyleSheet, Alert, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { collection, getDocs, query, where } from 'firebase/firestore';
-// import { signInWithEmailAndPassword } from 'firebase/auth';
-// import { FIREBASE_DB, FIREBASE_AUTH } from '../backend/FirebaseConfig';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { FIREBASE_DB, FIREBASE_AUTH } from '../backend/FirebaseConfig';
 import logo from '../../assets/images/blindSpotTextLogoTransparent.png';
 import AppContext from '../../contexts/appContext';
 import Icon from 'react-native-vector-icons/Feather';
+import theme from '../style/themes.js';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 export default function SignIn({ navigation }) {
     const { userEmail, setUserEmail } = useContext(AppContext);
-    const { userType, setUserType } = useContext(AppContext);
     const { userID, setUserID } = useContext(AppContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [savePassword, setSavePassword] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false); // New state for password visibility
     const [isLoading, setIsLoading] = useState(false);
-    // const auth = FIREBASE_AUTH;
 
     const handleLogin = async () => {
         setIsLoading(true);
-        if (savePassword) {
-            try {
-                await AsyncStorage.setItem('email', lowerCaseEmail);
-                await AsyncStorage.setItem('password', password);
-            } catch (error) {
-                console.warn('Failed to save password due to low storage space due to: ', error);
+        try {
+            const userCredential = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+            const user = userCredential.user;
+
+            // Save credentials if savePassword is true
+            if (savePassword) {
+                try {
+                    await AsyncStorage.setItem('email', email.toLowerCase());
+                    await AsyncStorage.setItem('password', password);
+                } catch (error) {
+                    console.warn('Failed to save password due to low storage space due to: ', error);
+                }
+            } else {
+                try {
+                    await AsyncStorage.removeItem('email');
+                    await AsyncStorage.removeItem('password');
+                } catch (error) {
+                    console.warn('Failed to remove saved password due to: ', error);
+                }
             }
-        } else {
-            try {
-                await AsyncStorage.removeItem('email');
-                await AsyncStorage.removeItem('password');
-            } catch (error) {
-                console.warn('Failed to remove saved password due to: ', error);
-            }
+
+            // Set user context
+            setUserEmail(user.email);
+            setUserID(user.uid);
+
+            // Navigate to home screen
+            navigation.navigate('Home');
+        } catch (error) {
+            Alert.alert('Login Error', error.message);
+        } finally {
+            setIsLoading(false);
         }
-        navigation.navigate('Home');
-        setIsLoading(false);
     };
 
     useEffect(() => {
@@ -67,9 +81,9 @@ export default function SignIn({ navigation }) {
             </View>
 
             {isLoading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color={theme.colors.activityIndicator} />
             ) : (
-                <View style = {{justifyContent: 'center'}}>
+                <View style={{ justifyContent: 'center' }}>
                     <Text style={styles.title}>Sign In</Text>
                     <TextInput
                         style={styles.input}
@@ -83,17 +97,17 @@ export default function SignIn({ navigation }) {
                     />
                     <View style={styles.passwordContainer}>
                         <TextInput
-                        style={styles.passwordInput}  // Updated style to prevent layout issues
-                        placeholder="Password"
-                        value={password}
-                        onChangeText={setPassword}
-                        textContentType="oneTimeCode"
-                        secureTextEntry={!isPasswordVisible} // Toggle visibility based on isPasswordVisible state
-                        autoCapitalize="none"
-                        autoCorrect={false}
+                            style={styles.passwordInput}  // Updated style to prevent layout issues
+                            placeholder="Password"
+                            value={password}
+                            onChangeText={setPassword}
+                            textContentType="oneTimeCode"
+                            secureTextEntry={!isPasswordVisible} // Toggle visibility based on isPasswordVisible state
+                            autoCapitalize="none"
+                            autoCorrect={false}
                         />
                         <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                            <Icon name={isPasswordVisible ? "eye-off" : "eye"} size={20} color="gray" />
+                            <Icon name={isPasswordVisible ? "eye-off" : "eye"} size={20} color={theme.colors.textSecondary} />
                         </TouchableOpacity>
                     </View>
                     <View style={styles.checkboxContainer}>
@@ -104,25 +118,25 @@ export default function SignIn({ navigation }) {
                         <Text style={styles.checkboxText}>Save Password</Text>
                     </View>
                     <TouchableOpacity onPress={handleLogin} style={styles.signInButton}>
-                        <Text style={{ color: 'white', textAlign: 'center' }}>SIGN IN</Text>
+                        <Text style={{ color: theme.colors.buttonText, textAlign: 'center' }}>SIGN IN</Text>
                     </TouchableOpacity>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 20 }}>
-                        <View style={{ flex: 1, borderBottomColor: 'gray', borderBottomWidth: 1 }} />
-                        <Text style={{ textAlign: 'center', marginHorizontal: 10, color: 'gray' }}>Or</Text>
-                        <View style={{ flex: 1, borderBottomColor: 'gray', borderBottomWidth: 1 }} />
+                        <View style={{ flex: 1, borderBottomColor: theme.colors.textSecondary, borderBottomWidth: 1 }} />
+                        <Text style={{ textAlign: 'center', marginHorizontal: 10, color: theme.colors.textSecondary }}>Or</Text>
+                        <View style={{ flex: 1, borderBottomColor: theme.colors.textSecondary, borderBottomWidth: 1 }} />
                     </View>
 
                     <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
-                    <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={styles.linkButton}>
-                        <Text style={{ color: '#AD0D8A', fontSize: 12, textAlign: 'center', marginTop: 4 }}>
-                            New to BlindSpot? <Text style={{ textDecorationLine: 'underline' }}>Sign up here</Text>
-                        </Text>
-                    </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={styles.linkButton}>
+                            <Text style={{ color: theme.colors.linkText, fontSize: 12, textAlign: 'center', marginTop: 4 }}>
+                                New to BlindSpot? <Text style={{ textDecorationLine: 'underline' }}>Sign up here</Text>
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 20 }}>
-                        <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={styles.linkButton}>
-                            <Text style={{ color: '#AD0D8A', fontSize: 12, textAlign: 'center', marginTop: 4}}>Forgot Password</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')} style={styles.linkButton}>
+                            <Text style={{ color: theme.colors.linkText, fontSize: 12, textAlign: 'center', marginTop: 4 }}>Forgot Password</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -136,19 +150,20 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 20,
-        backgroundColor: '#E4D8EB',
+        backgroundColor: theme.colors.background,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 20,
-        textAlign: 'center'
+        textAlign: 'center',
+        color: theme.colors.textPrimary,
     },
     input: {
         height: 40,
         marginBottom: 12,
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: theme.colors.inputBorder,
         padding: 10,
         borderRadius: 10,
     },
@@ -156,13 +171,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: theme.colors.inputBorder,
         borderRadius: 10,
         marginBottom: 12,
-        paddingHorizontal: 10, // Adjust padding to fit icon inside the container
+        paddingHorizontal: 10,
     },
     passwordInput: {
-        flex: 1,  // This will allow the TextInput to take up the remaining space
+        flex: 1,
         height: 40,
     },
     linkButton: {
@@ -175,7 +190,7 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     checkbox: {
-        backgroundColor: '#f5f5f5',
+        backgroundColor: theme.colors.lightGray,
         borderWidth: 0,
         padding: 0,
     },
@@ -184,7 +199,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     signInButton: {
-        backgroundColor: '#B100AE',
+        backgroundColor: theme.colors.primary,
         padding: 10,
         borderRadius: 10,
     }
