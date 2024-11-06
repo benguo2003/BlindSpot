@@ -3,6 +3,8 @@ import AppContext from '../../contexts/appContext';
 
 import { useNavigation } from '@react-navigation/native';
 import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useFonts } from "expo-font";
+import { RobotoSerif_400Regular } from "@expo-google-fonts/roboto-serif";
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
 
@@ -13,6 +15,10 @@ function Home() {
 
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
+
+    const [fontsLoaded] = useFonts({
+        RobotoSerif_400Regular,
+    });
 
     useEffect(() => {
         const handleResize = () => {
@@ -28,7 +34,7 @@ function Home() {
             subscription.remove();
         };
     }, []);
-
+    
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -79,6 +85,7 @@ const styles = StyleSheet.create({
     headerText: {
         fontSize: 15,
         color: 'black',
+        fontFamily: 'RobotoSerif_400Regular',
     },
     profileButton: {
         height: 42,

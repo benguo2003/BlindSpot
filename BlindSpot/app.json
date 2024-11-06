@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "BlindSpot",
+    "name": "BlindSpot!",
     "slug": "blindspot",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/blindspotLogo.jpeg",
     "userInterfaceStyle": "light",
@@ -15,7 +15,10 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.benguo2003.blindspot",
+      "infoPlist": {
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +28,21 @@
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/roboto-serif/RobotoSerif_400Regular.ttf"
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a133d99c-8b81-4f8f-ab5b-d6f02173e823"
+      }
     }
   }
 }
