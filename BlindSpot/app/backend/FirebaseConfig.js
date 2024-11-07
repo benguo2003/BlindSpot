@@ -2,9 +2,11 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {getStorage, ref} from "firebase/storage";
-import { initializeAuth, getAuth, getReactNativePersistence} from 'firebase/auth';
+import { initializeAuth, getAuth, getReactNativePersistence, GoogleAuthProvider,signInWithPopup} from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirestore } from "firebase/firestore";
+import axios from 'axios';
+
 
 import {
   FIREBASE_API_KEY,
@@ -13,6 +15,8 @@ import {
   FIREBASE_STORAGE_BUCKET,
   FIREBASE_MESSAGING_SENDER_ID,
   FIREBASE_APP_ID,
+  OPENAI_API_KEY,
+  OPENAI_PROJECT_ID,
 } from '@env';
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -38,3 +42,31 @@ const auth = initializeAuth(FIREBASE_APP, {
 export const FIREBASE_AUTH = getAuth(FIREBASE_APP);
 export const FIREBASE_DB = getFirestore(FIREBASE_APP);
 export const STORAGE = getStorage(FIREBASE_APP);
+
+
+
+ async function chatGPTRequest(question) {
+  const url = 'https://api.openai.com/v1/chat/completions';
+  const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      'Openai-Project': OPENAI_PROJECT_ID,
+  };
+
+  const data = {
+      model: 'gpt-3.5-turbo',
+      messages: [
+          { role: 'user', content: question}
+      ]
+  };
+  try {
+      const response = await axios.post(url, data, { headers });
+      //console.log('Response:', response.data);
+      console.log(response.data.choices[0].message.content);
+  } catch (error) {
+      console.error('Error:', error);
+  }
+}
+
+question = "What is the best time to have breakfast?";
+chatGPTRequest(question);
