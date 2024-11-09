@@ -12,6 +12,9 @@ const theme = {
         inputBorder: '#ccc',
         activityIndicator: '#0000ff',
     },
+    fonts: {
+        regular: 'RobotoSerif_400Regular',
+    },
 };
 
 export default theme;

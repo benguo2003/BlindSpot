@@ -1,66 +1,55 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import AppContext from '../../contexts/appContext';
-
 import { useNavigation } from '@react-navigation/native';
 import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { useFonts } from "expo-font";
-import { RobotoSerif_400Regular } from "@expo-google-fonts/roboto-serif";
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
 
-
 function Home() {
     const navigation = useNavigation();
-    const { userType } = useContext(AppContext);
+    const { userType, theme } = useContext(AppContext);
 
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
-
-    const [fontsLoaded] = useFonts({
-        RobotoSerif_400Regular,
-    });
 
     useEffect(() => {
         const handleResize = () => {
             setScreenWidth(Dimensions.get('window').width);
             setScreenHeight(Dimensions.get('window').height);
         };
-    
-        // Dimensions.addEventListener now returns a subscription object
+
         const subscription = Dimensions.addEventListener('change', handleResize);
-    
+
         return () => {
-            // Call the remove method on the subscription object to remove the event listener
             subscription.remove();
         };
     }, []);
-    
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.headerBox}>
-                    <Text style = {styles.headerText}>Welcome Back, Liz</Text>
+                    <Text style={[styles.headerText, { fontFamily: theme.fonts.regular }]}>Welcome Back, Liz</Text>
                     <TouchableOpacity 
-                        style = {styles.profileButton}
-                        onPress = {() => navigation.navigate('SignIn')}
-                        >
-                            <Image source = {Logo} style = {styles.profileImage} />
+                        style={styles.profileButton}
+                        onPress={() => navigation.navigate('SignIn')}
+                    >
+                        <Image source={Logo} style={styles.profileImage} />
                     </TouchableOpacity>
-
                 </View>
             </View>
-            <View style = {styles.main}>
-                <Text style={styles.mainText}>Schedule</Text>
-                <View style = {styles.thisWeekCalendar}>
-                    <Text style = {styles.cardTitle}>THIS WEEK</Text>
+            <View style={styles.main}>
+                <Text style={[styles.mainText, { fontFamily: theme.fonts.regular}]}>Schedule</Text>
+                <View style={styles.thisWeekCalendar}>
+                    <Text style={styles.cardTitle}>THIS WEEK</Text>
                 </View>
-                <View style = {styles.upcomingEvents}>
-                    <Text style = {styles.cardTitle}>UPCOMING EVENTS</Text>
+                <View style={styles.upcomingEvents}>
+                    <Text style={styles.cardTitle}>UPCOMING EVENTS</Text>
                 </View>
-            </View>            
+            </View>
             <Navbar navigation={navigation} />
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -85,7 +74,7 @@ const styles = StyleSheet.create({
     headerText: {
         fontSize: 15,
         color: 'black',
-        fontFamily: 'RobotoSerif_400Regular',
+        // fontFamily: 'RobotoSerif_400Regular', // Removed hardcoded font
     },
     profileButton: {
         height: 42,
@@ -142,6 +131,6 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
     },
-})
+});
 
 export default Home;
