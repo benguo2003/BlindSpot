@@ -1,0 +1,5 @@
+Given the following schedule [...], the user wants to fit in laundry (_ mins), vacuuming (_ mins), and meditation (_mins). How would her new schedule look?
+
+===
+
+What can be improved about this schedule? What is realistic and what is not?
