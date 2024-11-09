@@ -9,7 +9,7 @@ import Navbar from '../../components/Navbar';
 
 function Calendar() {
     const navigation = useNavigation();
-    const { userType } = useContext(AppContext);
+    const { userType, theme } = useContext(AppContext);
 
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
@@ -33,7 +33,7 @@ function Calendar() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.headerBox}>
-                    <Text style = {styles.headerText}>Calendar</Text>
+                    <Text style = {[styles.headerText, {fontFamily: theme.fonts.regular}]}>Calendar</Text>
                     <TouchableOpacity 
                         style = {styles.LogoContainer}
                         onPress = {() => navigation.navigate('SignIn')}
