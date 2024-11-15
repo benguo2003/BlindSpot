@@ -33,6 +33,7 @@ const firebaseConfig = {
     appId: FIREBASE_APP_ID,
 };
 
+
 // Initialize Firebase
 export const FIREBASE_APP = initializeApp(firebaseConfig);
 const auth = initializeAuth(FIREBASE_APP, {
@@ -43,7 +44,7 @@ export const FIREBASE_AUTH = getAuth(FIREBASE_APP);
 export const FIREBASE_DB = getFirestore(FIREBASE_APP);
 export const STORAGE = getStorage(FIREBASE_APP);
 
-
+//console.log(FIREBASE_API_KEY);
 
  async function chatGPTRequest(question) {
   const url = 'https://api.openai.com/v1/chat/completions';

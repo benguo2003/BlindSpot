@@ -132,5 +132,4 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
 });
-
 export default Home;
