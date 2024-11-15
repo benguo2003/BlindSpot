@@ -60,6 +60,7 @@ export const STORAGE = getStorage(FIREBASE_APP);
       ]
   };
   try {
+      //   console.log(OPENAI_API_KEY, OPENAI_PROJECT_ID);
       const response = await axios.post(url, data, { headers });
       //console.log('Response:', response.data);
       console.log(response.data.choices[0].message.content);
