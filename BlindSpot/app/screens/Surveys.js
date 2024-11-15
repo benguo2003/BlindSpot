@@ -33,7 +33,7 @@ function Surveys() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.headerBox}>
-                    <Text style = {[styles.headerText, {fontFamily: theme.fonts.regular}]}>Surveys</Text>
+                    <Text style = {[styles.headerText, {fontFamily: theme.fonts.bold}]}>Surveys</Text>
                     <TouchableOpacity 
                         style = {styles.LogoContainer}
                         onPress = {() => navigation.navigate('SignIn')}
@@ -60,22 +60,22 @@ const styles = StyleSheet.create({
         height: Math.min(80, Dimensions.get('window').height * 0.1),
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         marginHorizontal: 20,
         marginBottom: 15,
+        marginTop: 20,
     },
     headerBox: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: '100%',
-        marginTop: 30,
+        width: '100%',  
     },
     headerText: {
         fontSize: 40,
         color: 'black',
         textDecorationLine: 'underline',
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
     },
     LogoContainer: {
         height: 42,

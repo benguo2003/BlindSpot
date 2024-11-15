@@ -34,7 +34,8 @@
         "expo-font",
         {
           "fonts": [
-            "node_modules/@expo-google-fonts/roboto-serif/RobotoSerif_400Regular.ttf"
+            "node_modules/@expo-google-fonts/roboto-serif/RobotoSerif_400Regular.ttf",
+            "node_modules/@expo-google-fonts/roboto-serif/RobotoSerif_600SemiBold.ttf"
           ]
         }
       ]

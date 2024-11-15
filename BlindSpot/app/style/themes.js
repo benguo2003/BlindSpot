@@ -14,6 +14,7 @@ const theme = {
     },
     fonts: {
         regular: 'RobotoSerif_400Regular',
+        bold: 'RobotoSerif_600SemiBold',
     },
 };
 
