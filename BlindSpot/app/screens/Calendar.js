@@ -53,7 +53,9 @@ function Calendar() {
                     borderWidth: 1,
                     borderColor: 'black',
                     height: 350,
-                    backgroundColor: 'pink',  // This sets the overall background color
+                    backgroundColor: 'pink',
+                    borderRadius: 15,
+                    overflow: 'hidden',
                 }}
                 theme={{
                     backgroundColor: 'pink',
