@@ -69,5 +69,5 @@ export const STORAGE = getStorage(FIREBASE_APP);
   }
 }
 
-question = "What is the best time to have breakfast?";
-chatGPTRequest(question);
+// question = "What is the best time to have breakfast?";
+// chatGPTRequest(question);
