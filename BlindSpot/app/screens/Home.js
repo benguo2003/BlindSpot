@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
+import CalendarDay from '../../components/CalendarDay';
 
 function Home() {
     const navigation = useNavigation();
@@ -11,6 +12,24 @@ function Home() {
 
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
+
+    const calculateDayWidth = () => {
+        const containerPadding = 10 * 2;
+        const outerMargins = 5 * 2;
+        const innerMargins = 2 * 6;
+        const availableWidth = screenWidth - 40 - containerPadding - outerMargins - innerMargins;
+        return Math.floor(availableWidth / 7);
+    };
+
+    const currentDate = new Date();
+    const monday = new Date(currentDate);
+    monday.setDate(currentDate.getDate() - currentDate.getDay() + (currentDate.getDay() === 0 ? -6 : 1));
+
+    const weekDates = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + index);
+        return date;
+    });
 
     useEffect(() => {
         const handleResize = () => {
@@ -24,6 +43,13 @@ function Home() {
             subscription.remove();
         };
     }, []);
+
+    // Check if two dates are the same day
+    const isSameDay = (date1, date2) => {
+        return date1.getDate() === date2.getDate() &&
+               date1.getMonth() === date2.getMonth() &&
+               date1.getFullYear() === date2.getFullYear();
+    };
 
     return (
         <View style={styles.container}>
@@ -39,9 +65,24 @@ function Home() {
                 </View>
             </View>
             <View style={styles.main}>
-                <Text style={[styles.mainText, { fontFamily: theme.fonts.regular}]}>Schedule</Text>
+                <Text style={[styles.mainText, { fontFamily: theme.fonts.bold}]}>Schedule</Text>
                 <View style={styles.thisWeekCalendar}>
                     <Text style={styles.cardTitle}>THIS WEEK</Text>
+                    <View style={styles.calendarRow}>
+                        {weekDates.map((date, index) => (
+                            <CalendarDay
+                                key={index}
+                                dayIndex={index}
+                                dayNum={date.getDate()}
+                                colorDefault='white'
+                                colorSelect='#6A0DAD'
+                                widthSize={calculateDayWidth()}
+                                fontSizeDayName={12}
+                                fontSizeDayNum={20}
+                                isSelected={isSameDay(date, currentDate)}
+                            />
+                        ))}
+                    </View>
                 </View>
                 <View style={styles.upcomingEvents}>
                     <Text style={styles.cardTitle}>UPCOMING EVENTS</Text>
@@ -64,6 +105,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         marginHorizontal: 20,
         marginBottom: 5,
+        marginTop: 10,
     },
     headerBox: {
         flexDirection: 'row',
@@ -74,7 +116,6 @@ const styles = StyleSheet.create({
     headerText: {
         fontSize: 15,
         color: 'black',
-        // fontFamily: 'RobotoSerif_400Regular', // Removed hardcoded font
     },
     profileButton: {
         height: 42,
@@ -97,7 +138,6 @@ const styles = StyleSheet.create({
         color: 'black',
         textAlign: 'left',
         textDecorationLine: 'underline',
-        fontWeight: 'bold',
     },
     thisWeekCalendar: {
         height: 150,
@@ -111,6 +151,13 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+    },
+    calendarRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+        marginHorizontal: 5,
     },
     cardTitle: {
         fontSize: 14,

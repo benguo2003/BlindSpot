@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { useFonts } from 'expo-font';
-import { RobotoSerif_400Regular } from '@expo-google-fonts/roboto-serif';
+import { RobotoSerif_400Regular, RobotoSerif_600SemiBold } from '@expo-google-fonts/roboto-serif';
 import { ActivityIndicator, View } from 'react-native';
 import theme from '../app/style/themes';
 
@@ -9,6 +9,7 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
     const [fontsLoaded] = useFonts({
         RobotoSerif_400Regular,
+        RobotoSerif_600SemiBold,
     });
 
     const [userEmail, setUserEmail] = useState(null);

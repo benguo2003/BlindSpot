@@ -2,7 +2,7 @@
   "expo": {
     "name": "BlindSpot!",
     "slug": "blindspot",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/blindspotLogo.jpeg",
     "userInterfaceStyle": "light",
@@ -34,7 +34,8 @@
         "expo-font",
         {
           "fonts": [
-            "node_modules/@expo-google-fonts/roboto-serif/RobotoSerif_400Regular.ttf"
+            "node_modules/@expo-google-fonts/roboto-serif/RobotoSerif_400Regular.ttf",
+            "node_modules/@expo-google-fonts/roboto-serif/RobotoSerif_600SemiBold.ttf"
           ]
         }
       ]

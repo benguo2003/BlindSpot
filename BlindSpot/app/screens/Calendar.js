@@ -3,6 +3,7 @@ import AppContext from '../../contexts/appContext';
 
 import { useNavigation } from '@react-navigation/native';
 import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import {Calendar as RNCalendar, CalendarList, Agenda} from 'react-native-calendars';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
 
@@ -13,6 +14,9 @@ function Calendar() {
 
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
+
+    const [selected, setSelected] = useState('');
+
 
     useEffect(() => {
         const handleResize = () => {
@@ -33,18 +37,62 @@ function Calendar() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.headerBox}>
-                    <Text style = {[styles.headerText, {fontFamily: theme.fonts.regular}]}>Calendar</Text>
+                    <Text style = {[styles.headerText, {fontFamily: theme.fonts.bold}]}>Calendar</Text>
                     <TouchableOpacity 
                         style = {styles.LogoContainer}
                         onPress = {() => navigation.navigate('SignIn')}
                         >
                             <Image source = {Logo} style = {styles.LogoImage} />
                     </TouchableOpacity>
-
+                    
                 </View>
             </View>
             <View style = {styles.main}>
-
+            <RNCalendar
+                style={{
+                    borderWidth: 1,
+                    borderColor: 'black',
+                    height: 350,
+                    backgroundColor: 'pink',
+                    borderRadius: 15,
+                    overflow: 'hidden',
+                }}
+                theme={{
+                    backgroundColor: 'pink',
+                    calendarBackground: 'pink',
+                    selectedDayBackgroundColor: 'purple',  // This is the deeper purple for selection
+                    selectedDayTextColor: 'white',
+                    dayTextColor: 'black',
+                    textDisabledColor: '#d9e1e8',
+                    dotColor: 'purple',
+                    selectedDotColor: '#ffffff',
+                    arrowColor: 'black',
+                    todayTextColor: '#fc03ba',  
+                    monthTextColor: 'black',
+                    textSectionTitleColor: 'black', 
+                    textDayFontWeight: '300',
+                    textMonthFontWeight: 'bold',
+                    textDayHeaderFontWeight: '300',
+                    textDayFontSize: 16,
+                    textMonthFontSize: 16,
+                    textDayHeaderFontSize: 16,
+                }}
+                onDayPress={day => {
+                    setSelected(day.dateString);
+                    console.log('selected day', day);
+                }}
+                markedDates={{
+                    [selected]: {
+                        selected: true,
+                        disableTouchEvent: true,
+                        selectedDotColor: 'white'
+                    }
+                }}
+            />
+            <View style={styles.eventsContainer}>
+                <Text style={styles.eventsTitle}>Upcoming Events</Text>
+                {/* Future events will go here */}
+            </View>
             </View>            
             <Navbar navigation={navigation} />
         </View>
@@ -60,22 +108,22 @@ const styles = StyleSheet.create({
         height: Math.min(80, Dimensions.get('window').height * 0.1),
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         marginHorizontal: 20,
         marginBottom: 15,
+        marginTop: 20,
     },
     headerBox: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: '100%',
-        marginTop: 30,
+        width: '100%',  
     },
     headerText: {
         fontSize: 40,
         color: 'black',
         textDecorationLine: 'underline',
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
     },
     LogoContainer: {
         height: 42,
@@ -93,7 +141,21 @@ const styles = StyleSheet.create({
         backgroundColor: '#E4D8EB',
         marginHorizontal: 20,
     },
-    
+    eventsContainer: {
+        marginTop: 20,
+        backgroundColor: 'pink',
+        borderRadius: 15,
+        padding: 15,
+        minHeight: 200,  // Adjust this value to make the container bigger or smaller
+        borderWidth: 1,
+        borderColor: 'black',
+    },
+    eventsTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: 'black',
+        marginBottom: 10,
+    },
 })
 
 export default Calendar;
