@@ -3,7 +3,7 @@
 import { FIREBASE_DB} from './FirebaseConfig';
 import {doc, setDoc, getDoc} from 'firebase/firestore';
 async function addUserToUsersCollection(userID, email, name, age){
-    calendar_id = userID + 'calendar';
+    calendar_id = userID + '_calendar';
     try{
         const calendarRef = doc(FIREBASE_DB, 'calendars', calendar_id);
         const calendarSnap = await getDoc(calendarRef);
@@ -20,8 +20,9 @@ async function addUserToUsersCollection(userID, email, name, age){
             age: age,
             calendar_id: calendar_id,
         });
+        const calendar_name = userID + '_calendar'
         await setDoc(calendarRef, {
-            name: 'calendarTest',
+            name: calendar_name,
         })
         console.log(`User "${name}" added with calendar id "${calendar_id}".`);
     }

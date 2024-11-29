@@ -6,6 +6,8 @@ import logo from '../../assets/images/blindSpotTextLogoTransparent.png';
 import Icon from 'react-native-vector-icons/Feather';
 import theme from '../style/themes.js';
 import {addUserToUsersCollection} from '../backend/backendSignUp';
+import {addEvent} from '../backend/addEvent'
+import {removeEvent} from '../backend/removeEvent'
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -39,6 +41,9 @@ export default function SignUp({ navigation }) {
         try {
             await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
             await addUserToUsersCollection('testuser123', email, 'testUser', 30); //hard coded userID and name for testing purposes...can change this later
+            await addEvent('testuser123', 'testuser123_event1', 'breakfast', 'eating first meal', true, 'daily', 1);
+            await addEvent('testuser123', 'testuser123_delete', 'del_event', 'to be deleted', true, 'weekly', 2);
+            await removeEvent('testuser123', 'del_event');
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('SignIn');
         } catch (error) {
