@@ -6,12 +6,14 @@ import AppContext from '../contexts/appContext';
 const CalendarDay = ({
     dayIndex = 0,
     dayNum = 1,
+    date, // Add this prop
     colorDefault = 'white',
     colorSelect = '#6A0DAD',
     widthSize = 44,
     fontSizeDayName = 12,
     fontSizeDayNum = 20,
     isSelected = false,
+    onPress, // Add this prop
 }) => {
     const { theme } = useContext(AppContext);
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
@@ -31,6 +33,12 @@ const CalendarDay = ({
         return days[dayIndex];
     };
 
+    const handlePress = () => {
+        if (onPress && date) {
+            onPress(date);
+        }
+    };
+
     return (
         <TouchableOpacity 
             style={[
@@ -40,6 +48,7 @@ const CalendarDay = ({
                     backgroundColor: isSelected ? colorSelect : colorDefault
                 }
             ]}
+            onPress={handlePress}  // Add the onPress handler
         >
             <View style={styles.card}>
                 <Text 
@@ -80,7 +89,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2,
         elevation: 5,
-
     },
     card: {
         justifyContent: 'center',
