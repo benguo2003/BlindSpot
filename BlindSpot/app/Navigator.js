@@ -7,6 +7,7 @@ import SignUp from './screens/SignUp';
 import Home from './screens/Home';
 import Calendar from './screens/Calendar';
 import Surveys from './screens/Surveys';
+import Profile from './screens/Profile';
 import ForgotPassword from './screens/ForgotPassword';
 
 const Stack = createNativeStackNavigator();
@@ -62,6 +63,15 @@ function AppNavigator() {
             <Stack.Screen
                 name = "Surveys"
                 component = {Surveys}
+                options = {{
+                    animation: 'fade',
+                    headerShown: false,
+                }}
+            />
+
+            <Stack.Screen 
+                name="Profile" 
+                component={Profile} 
                 options = {{
                     animation: 'fade',
                     headerShown: false,
