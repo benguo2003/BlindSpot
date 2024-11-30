@@ -1,6 +1,6 @@
 import { FIREBASE_DB} from './FirebaseConfig';
-import {doc, setDoc, getDoc, query, where, getDocs, deleteDoc} from 'firebase/firestore';
-async function addEvent(user_id, event_id, title, description, recurring, recurrence_type, recurrence_num)
+import {doc, setDoc, getDoc} from 'firebase/firestore';
+async function addEvent(user_id, event_id, title, description, location, recurring, recurrence_type, recurrence_num, start_time, end_time)
 {
     try{
         const userRef = doc(FIREBASE_DB, 'users', user_id);
@@ -13,9 +13,12 @@ async function addEvent(user_id, event_id, title, description, recurring, recurr
             calendar_id: calendar_id,
             title: title,
             description: description,
+            location: location,
             recurring: recurring,
             recurrence_type: recurrence_type,
             recurrence_num: recurrence_num,
+            start_time: start_time,
+            end_time: end_time,
         }
         );
         console.log(`Event "${title}" added successfully.`);

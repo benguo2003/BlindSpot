@@ -2,6 +2,7 @@
 // establish this as a baseline and organize the repo to where the implementation for this feature can begin
 import { FIREBASE_DB} from './FirebaseConfig';
 import {doc, setDoc, getDoc} from 'firebase/firestore';
+//all string parameters except age
 async function addUserToUsersCollection(userID, email, name, age){
     calendar_id = userID + '_calendar';
     try{

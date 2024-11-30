@@ -1,5 +1,6 @@
 import { FIREBASE_DB} from './FirebaseConfig';
-import {doc, setDoc, getDoc, query, where, getDocs, deleteDoc, collection} from 'firebase/firestore';
+import {doc, getDoc, query, where, getDocs, deleteDoc, collection} from 'firebase/firestore';
+//both parameters as strings
 async function removeEvent(userID, event_title){
     try{
         const userRef = doc(FIREBASE_DB, 'users', userID);
