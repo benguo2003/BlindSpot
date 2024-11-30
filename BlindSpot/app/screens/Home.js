@@ -229,9 +229,12 @@ function Home() {
                     </Text>
                     <TouchableOpacity 
                         style={styles.profileButton}
-                        onPress={() => navigation.navigate('SignIn')}
+                        onPress={() => navigation.navigate('Profile')}
                     >
-                        <Image source={Logo} style={styles.profileImage} />
+                        <Image 
+                            source={require('../../assets/images/profile.png')}
+                            style={styles.profileImage}
+                        />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -320,10 +323,14 @@ const styles = StyleSheet.create({
         borderRadius: 21,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#E0E0E0',
+        overflow: 'hidden',
     },
     profileImage: {
-        height: 40,
-        width: 40,
+        height: '100%',
+        width: '100%',
+        borderRadius: 21,
+        borderWidth: 1,
     },
     main: {
         flex: 1,
