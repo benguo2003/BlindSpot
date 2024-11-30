@@ -1,13 +1,31 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Phone, Smile, LogOut, Trash2 } from 'lucide-react-native';
 import AppContext from '../../contexts/appContext';
 import Navbar from '../../components/Navbar';
+import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 
 function Profile({ navigation }) {
     const { theme } = useContext(AppContext);
     const [profileImage, setProfileImage] = useState(null);
+    const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
+    const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setScreenWidth(Dimensions.get('window').width);
+            setScreenHeight(Dimensions.get('window').height);
+        };
+    
+        // Dimensions.addEventListener now returns a subscription object
+        const subscription = Dimensions.addEventListener('change', handleResize);
+    
+        return () => {
+            // Call the remove method on the subscription object to remove the event listener
+            subscription.remove();
+        };
+    }, []);
 
     const requestPermission = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -96,7 +114,17 @@ function Profile({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <Text style={[styles.headerText, { fontFamily: theme.fonts.bold }]}>Your Profile</Text>
+            <View style={styles.header}>
+                <View style={styles.headerBox}>
+                    <Text style={[styles.headerText, { fontFamily: theme.fonts.bold }]}>Your Profile</Text>
+                    <TouchableOpacity 
+                        style={styles.LogoContainer}
+                        onPress={() => navigation.navigate('SignIn')}
+                    >
+                        <Image source={Logo} style={styles.LogoImage} />
+                    </TouchableOpacity>
+                </View>
+            </View>
             <View style={styles.main}>
                 <View style={styles.profileSection}>
                     <View style={styles.profileImageContainer}>
@@ -171,24 +199,50 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#E4D8EB',
-        padding: 20,
+    },
+    header: {
+        height: Math.min(80, Dimensions.get('window').height * 0.1),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 20,
+        marginBottom: 15,
+        marginTop: 20,
+    },
+    headerBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+    },
+    headerText: {
+        fontSize: 40,  // Updated to match Calendar.js
+        color: 'black',
+        textDecorationLine: 'underline',
+    },
+    LogoContainer: {
+        height: 42,
+        width: 42,
+        borderRadius: 21,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    LogoImage: {
+        height: 40,
+        width: 40,
     },
     main: {
         flex: 1,
         backgroundColor: '#E4D8EB',
-    },
-    headerText: {
-        fontSize: 32,
-        marginBottom: 20,
-        textDecorationLine: 'underline',
+        marginHorizontal: 20,
     },
     profileSection: {
         alignItems: 'center',
         marginBottom: 20,
     },
     profileImageContainer: {
-        width: 100,  // Smaller size
-        height: 100, // Smaller size
+        width: 100,
+        height: 100,
         borderRadius: 50,
         backgroundColor: '#E0E0E0',
         overflow: 'hidden',
@@ -230,7 +284,6 @@ const styles = StyleSheet.create({
     infoSection: {
         marginTop: 5,
         marginBottom: 20,
-        paddingHorizontal: 10,
     },
     infoContainer: {
         backgroundColor: '#DE3A9B',

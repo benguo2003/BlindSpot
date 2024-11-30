@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useState, useRef  } from 'react';
 import AppContext from '../../contexts/appContext';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
@@ -132,17 +132,16 @@ function Home() {
     });
 
     // Event handlers
-    const handleDayPress = (date) => {
-        setSelectedDay(new Date(date));
+    const scrollToFirstEvent = (date) => {
         const dayEvents = mockEvents.filter(event => 
             isSameDay(new Date(event.start_time), new Date(date))
         );
-
+    
         if (dayEvents.length > 0) {
             const firstEvent = dayEvents.reduce((earliest, current) => 
                 current.start_time < earliest.start_time ? current : earliest
             , dayEvents[0]);
-
+    
             const scrollPosition = Math.max(0, (firstEvent.start_time.getHours() - 0.5) * 60);
             setTimeout(() => {
                 scrollViewRef.current?.scrollTo({
@@ -152,6 +151,17 @@ function Home() {
             }, 100);
         }
     };
+
+    const handleDayPress = (date) => {
+        setSelectedDay(new Date(date));
+        scrollToFirstEvent(date);
+    };
+
+    useFocusEffect(
+        React.useCallback(() => {
+            scrollToFirstEvent(new Date());
+        }, [])
+    );
 
     // Event styling
     const getEventColors = (category, priority) => {
