@@ -123,6 +123,35 @@ async function updateDescription(user_id, event_title, new_description)
     
 } 
 
+//event title and new location 
+async function updateLocation(user_id, event_title, new_location){
+    try{
+        //get the user calendar id
+        const userRef = doc(FIREBASE_DB, 'users', user_id);
+        const userSnap = await getDoc(userRef);
+        const calendar_id = userSnap.data().calendar_id;
+        //search the events collection for the desired event to update
+        const eventQuery = query(
+            collection(FIREBASE_DB, 'events'),
+            where('calendar_id', '==', calendar_id),
+            where('title', '==', event_title)
+        );
+        // make the update
+        const queryResult = await getDocs(eventQuery);
+        queryResult.forEach(async (eventDoc) =>{
+            const eventRef = doc(FIREBASE_DB, 'events', eventDoc.id)
+            await updateDoc(eventRef,{
+                location: new_location,
+            });
+        });
+        console.log(`Event location updated.`);
+        return true;    
+        } catch(error){
+        console.error('Error updating location: ', error);
+        return false;
+        }
+    
+}
 //all update functions return boolean for whether or not the function was successful or not
 
 //both string parameters
@@ -149,6 +178,7 @@ async function findEvent(user_id, event_title){
                 id: doc.id,
                 title: data.title,
                 description: data.description,
+                location: data.location,
                 start_time: start_time.toLocaleString(),
                 end_time: end_time.toLocaleString(),
                 recurring: data.recurring,
@@ -192,6 +222,7 @@ async function displayEvents(user_id, day, month, year){
                     id: doc.id,
                     title: data.title,
                     description: data.description,
+                    location: data.location,
                     start_time: date_start.toLocaleString(),
                     end_time: date_end.toLocaleString(),
                     recurring: data.recurring,
@@ -210,4 +241,4 @@ async function displayEvents(user_id, day, month, year){
 } //returns a list of json objects with each json having each of the event fields (title, description, start and end times, etc.)
 //end time and start time edited in the function so the output is readable (same format as find_event)
 
-export {updateTitle, updateRecurrence, updateTime, updateDescription, findEvent, displayEvents};
+export {updateTitle, updateRecurrence, updateTime, updateDescription,updateLocation, findEvent, displayEvents};
