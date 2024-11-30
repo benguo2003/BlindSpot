@@ -9,6 +9,7 @@ import {addUserToUsersCollection} from '../backend/backendSignUp';
 import {addEvent} from '../backend/addEvent'
 import {removeEvent} from '../backend/removeEvent'
 import {updateTitle, updateRecurrence, updateTime, updateDescription, findEvent, displayEvents} from '../backend/updateEvent'
+import {updateProfile, retrieveInfo} from '../backend/updateProfile'
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -42,17 +43,26 @@ export default function SignUp({ navigation }) {
         try {
             await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
             await addUserToUsersCollection('testuser123', email, 'testUser', 30); //hard coded userID and name for testing purposes...can change this later
-            const now = new Date(); // Current time
-            const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); // Add 1 hour
-            await addEvent('testuser123', 'testuser123_event1', 'breakfast', 'eating first meal', true, 'daily', 1, now, oneHourLater);
-            await addEvent('testuser123', 'testuser123_delete', 'del_event', 'to be deleted', true, 'weekly', 2, now, oneHourLater);
+            const start_time = new Date(2025, 2, 31, 7,0,0); // Current time
+            const oneHourLater = new Date(start_time.getTime() + 60 * 60 * 1000); // Add 1 hour
+            await addEvent('testuser123', 'testuser123_breakfast', 'breakfast', 'eating first meal', true, 'daily', 1, start_time, oneHourLater);
+            const start_time2 = new Date(2025, 2, 31, 15, 0, 0);
+            const end_time2 = new Date(start_time2.getTime() + 60 * 60 * 1000); //add 1 hour
+            await addEvent('testuser123', 'testuser123_delete', 'del_event', 'to be deleted', true, 'weekly', 2, start_time, oneHourLater);
             await removeEvent('testuser123', 'del_event');
             await updateTitle('testuser123', 'breakfast', 'Breakfast_New');
             await updateRecurrence('testuser123', 'Breakfast_New', true, 'daily', 2);
-            await updateTime('testuser123', 'Breakfast_New', new Date(now.getTime() + 3600000), new Date(now.getTime() + 7200000));
+            await updateTime('testuser123', 'Breakfast_New', new Date(2025, 2, 31, 6, 0,0), new Date(2025,2,31,6,30,0));
             await updateDescription('testuser123', 'Breakfast_New', 'new breakfast description');
-            const x = await displayEvents('testuser123');
+            await addEvent('testuser123', 'testuser123_workout', 'Workout', 'exercise for the day', false, '',-1, start_time2, end_time2);
+            await addEvent('testuser123', 'testuser123_class', 'Class', 'class for the day', false, '',-1, new Date(2025, 3, 3, 10,30,0), new Date(2025,3,3,11,30,0));
+            const x = await displayEvents('testuser123', 31, 3, 2025);
             console.log(x);
+            await updateProfile('testuser123', 22, 'testuser1111111');
+            const y = await retrieveInfo('testuser123');
+            console.log(y);
+            const z = await findEvent('testuser123', 'Workout');
+            console.log(z);
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('SignIn');
         } catch (error) {
