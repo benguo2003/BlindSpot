@@ -1,6 +1,6 @@
 import { FIREBASE_DB} from './FirebaseConfig';
 import {doc, setDoc, getDoc} from 'firebase/firestore';
-async function addEvent(user_id, event_id, title, description, location, recurring, recurrence_type, recurrence_num, start_time, end_time)
+export async function addEvent(user_id, event_id, title, description, location, recurring, recurrence_type, recurrence_num, start_time, end_time)
 {
     try{
         const userRef = doc(FIREBASE_DB, 'users', user_id);
