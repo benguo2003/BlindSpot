@@ -1,7 +1,20 @@
 import React, { useContext, useEffect, useState, useRef  } from 'react';
 import AppContext from '../../contexts/appContext';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { 
+    View, 
+    Dimensions, 
+    Text, 
+    StyleSheet, 
+    Image, 
+    TouchableOpacity, 
+    ScrollView, 
+    Modal, 
+    TextInput, 
+    KeyboardAvoidingView, 
+    TouchableWithoutFeedback, 
+    Keyboard,
+    Platform } from 'react-native';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
 import CalendarDay from '../../components/CalendarDay';
@@ -31,6 +44,12 @@ function Home() {
     const [selectedDay, setSelectedDay] = useState(new Date());
 
     const scrollViewRef = useRef(null);
+
+    const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [eventNote, setEventNote] = useState('');
 
     const mockEvents = [
         // Monday Nov 20
@@ -114,9 +133,36 @@ function Home() {
     };
 
     const getMonday = (d) => {
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-        return new Date(d.setDate(diff));
+        const date = new Date(d);
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        date.setDate(diff + (currentWeekOffset * 7));
+        return date;
+    };
+
+    // Week navigation functions
+    const handlePreviousWeek = () => {
+        setCurrentWeekOffset(prev => prev - 1);
+    };
+    
+    const handleNextWeek = () => {
+        setCurrentWeekOffset(prev => prev + 1);
+    };
+
+    const getWeekText = () => {
+        if (currentWeekOffset === 0) {
+            return "THIS WEEK";
+        } else if (currentWeekOffset > 0) {
+            return "COMING WEEK";
+        } else {
+            return "PREVIOUS WEEK";
+        }
+    };
+
+    const handleResetToCurrentWeek = () => {
+        setCurrentWeekOffset(0);
+        setSelectedDay(new Date());
+        scrollToFirstEvent(new Date());
     };
 
     // Calendar setup
@@ -159,9 +205,16 @@ function Home() {
 
     useFocusEffect(
         React.useCallback(() => {
+            handleResetToCurrentWeek(); // Reset to current week
             scrollToFirstEvent(new Date());
         }, [])
     );
+
+    const handleEventPress = (event) => {
+        setSelectedEvent(event);
+        setEventNote(''); // Reset note when opening new event
+        setModalVisible(true);
+    };
 
     // Event styling
     const getEventColors = (category, priority) => {
@@ -212,21 +265,24 @@ function Home() {
 
     // Render components
     const renderEvent = (event, index) => (
-        <LinearGradient
+        <TouchableOpacity
             key={index}
-            colors={getEventColors(event.event_category, event.priority)}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.eventCard, getEventPositionStyle(event)]}
+            onPress={() => handleEventPress(event)}
         >
-            <View style={styles.eventContent}>
-                {/* <Text style={styles.eventCategory}>{event.event_category}</Text> */}
-                <Text style={styles.eventTitle}>{event.event_title}</Text>
-                <Text style={styles.eventTime}>
-                    {formatTime(event.start_time)} - {formatTime(event.end_time)}
-                </Text>
-            </View>
-        </LinearGradient>
+            <LinearGradient
+                colors={getEventColors(event.event_category, event.priority)}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.eventCard, getEventPositionStyle(event)]}
+            >
+                <View style={styles.eventContent}>
+                    <Text style={styles.eventTitle}>{event.event_title}</Text>
+                    <Text style={styles.eventTime}>
+                        {formatTime(event.start_time)} - {formatTime(event.end_time)}
+                    </Text>
+                </View>
+            </LinearGradient>
+        </TouchableOpacity>
     );
 
     return (
@@ -255,23 +311,42 @@ function Home() {
                 
                 {/* Calendar */}
                 <View style={styles.thisWeekCalendar}>
-                    <Text style={styles.cardTitle}>THIS WEEK</Text>
+                    <View style={styles.weekNavigation}>
+                        <TouchableOpacity 
+                            onPress={handlePreviousWeek}
+                            style={styles.navigationButton}
+                        >
+                            <Text style={styles.navigationArrow}>{'◀'}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            onPress={handleResetToCurrentWeek}
+                            style={styles.weekTextButton}
+                        >
+                            <Text style={styles.cardTitle}>{getWeekText()}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            onPress={handleNextWeek}
+                            style={styles.navigationButton}
+                        >
+                            <Text style={styles.navigationArrow}>{'▶'}</Text>
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.calendarRow}>
-                    {weekDates.map((date, index) => (
-                        <CalendarDay
-                            key={index}
-                            dayIndex={index}
-                            dayNum={date.getDate()}
-                            date={date}
-                            colorDefault='white'
-                            colorSelect='#6A0DAD'
-                            widthSize={calculateDayWidth()}
-                            fontSizeDayName={12}
-                            fontSizeDayNum={20}
-                            isSelected={isSameDay(date, selectedDay)}
-                            onPress={handleDayPress}
-                        />
-                    ))}
+                        {weekDates.map((date, index) => (
+                            <CalendarDay
+                                key={index}
+                                dayIndex={index}
+                                dayNum={date.getDate()}
+                                date={date}
+                                colorDefault='white'
+                                colorSelect='#6A0DAD'
+                                widthSize={calculateDayWidth()}
+                                fontSizeDayName={12}
+                                fontSizeDayNum={20}
+                                isSelected={isSameDay(date, selectedDay)}
+                                onPress={handleDayPress}
+                            />
+                        ))}
                     </View>
                 </View>
 
@@ -299,6 +374,60 @@ function Home() {
             </View>
             
             <Navbar navigation={navigation} />
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <KeyboardAvoidingView 
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        style={modalStyle.modalOverlay}
+                    >
+                        <TouchableWithoutFeedback onPress={e => e.stopPropagation()}>
+                            <View style={modalStyle.modalContent}>
+                                <TouchableOpacity 
+                                    style={modalStyle.closeButton}
+                                    onPress={() => setModalVisible(false)}
+                                >
+                                    <Text style={modalStyle.closeButtonText}>✕</Text>
+                                </TouchableOpacity>
+                                
+                                {selectedEvent && (
+                                    <>
+                                        <LinearGradient
+                                            colors={getEventColors(selectedEvent.event_category, selectedEvent.priority)}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 1 }}
+                                            style={modalStyle.modalHeader}
+                                        >
+                                            <Text style={modalStyle.modalTitle}>{selectedEvent.event_title}</Text>
+                                            <Text style={modalStyle.modalCategory}>{selectedEvent.event_category}</Text>
+                                        </LinearGradient>
+                                        
+                                        <View style={modalStyle.modalBody}>
+                                            <Text style={modalStyle.modalTime}>
+                                                {formatTime(selectedEvent.start_time)} - {formatTime(selectedEvent.end_time)}
+                                            </Text>
+                                            
+                                            <Text style={modalStyle.notesLabel}>Notes:</Text>
+                                            <TextInput
+                                                style={modalStyle.notesInput}
+                                                multiline
+                                                value={eventNote}
+                                                onChangeText={setEventNote}
+                                                placeholder="Add your notes here..."
+                                                placeholderTextColor="#666"
+                                            />
+                                        </View>
+                                    </>
+                                )}
+                            </View>
+                        </TouchableWithoutFeedback>
+                    </KeyboardAvoidingView>
+                </TouchableWithoutFeedback>
+            </Modal>
         </View>
     );
 }
@@ -366,6 +495,20 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
     },
+    weekNavigation: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+    },
+    navigationButton: {
+        padding: 0,
+    },
+    navigationArrow: {
+        fontSize: 18,
+        color: 'black',
+        fontWeight: 'bold',
+    },
     calendarRow: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -378,6 +521,9 @@ const styles = StyleSheet.create({
         color: 'black',
         textAlign: 'center',
         fontWeight: 'bold',
+    },
+    weekTextButton: {
+        padding: 0,
     },
     upcomingEvents: {
         height: 350,
@@ -519,6 +665,73 @@ const styles = StyleSheet.create({
             zIndex: 1,
         };
     },
+});
+
+const modalStyle = StyleSheet.create({
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        width: '90%',
+        maxHeight: '80%',
+        elevation: 5,
+        position: 'relative',
+    },
+    closeButton: {
+        position: 'absolute',
+        right: 15,
+        top: 15,
+        zIndex: 1,
+    },
+    closeButtonText: {
+        fontSize: 24,
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    modalHeader: {
+        padding: 20,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
+    modalTitle: {
+        fontSize: 24,
+        color: 'white',
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    modalCategory: {
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.9)',
+        fontWeight: '500',
+    },
+    modalBody: {
+        padding: 20,
+    },
+    modalTime: {
+        fontSize: 18,
+        color: '#333',
+        marginBottom: 20,
+    },
+    notesLabel: {
+        fontSize: 16,
+        color: '#333',
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    notesInput: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 10,
+        padding: 15,
+        minHeight: 100,
+        textAlignVertical: 'top',
+        color: '#333',
+    }
 });
 
 export default Home;

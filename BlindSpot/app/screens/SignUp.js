@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Image, Dimensions, TextInput, Button, StyleSheet, Alert, Text, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../backend/FirebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -25,6 +25,7 @@ export default function SignUp({ navigation }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [userID, setUserID] = useContext(AppContext);
 
     const handleSignUp = async () => {
         if (!validateEmail(email)) {
@@ -41,31 +42,34 @@ export default function SignUp({ navigation }) {
         }
 
         try {
+            let user_id = email + new Date().getTime().toString();
             await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
-            await addUserToUsersCollection('testuser123', email, 'testUser', 30); //hard coded userID and name for testing purposes...can change this later
+            await addUserToUsersCollection(user_id, email, 'testUser', 30); //hard coded userID and name for testing purposes...can change this later
+            
             const start_time = new Date(2025, 2, 31, 7,0,0); // Current time
             const oneHourLater = new Date(start_time.getTime() + 60 * 60 * 1000); // Add 1 hour
-            await addEvent('testuser123', 'testuser123_breakfast', 'breakfast', 'eating first meal', 'Home', true, 'daily', 1, start_time, oneHourLater);
+            await addEvent(user_id, 'testuser123_breakfast', 'breakfast', 'eating first meal', 'Home', true, 'daily', 1, start_time, oneHourLater);
             const start_time2 = new Date(2025, 2, 31, 15, 0, 0);
             const end_time2 = new Date(start_time2.getTime() + 60 * 60 * 1000); //add 1 hour
-            await addEvent('testuser123', 'testuser123_delete', 'del_event', 'to be deleted', 'delete_location', true, 'weekly', 2, start_time, oneHourLater);
-            await removeEvent('testuser123', 'del_event');
-            await updateTitle('testuser123', 'breakfast', 'Breakfast_New');
-            await updateRecurrence('testuser123', 'Breakfast_New', true, 'daily', 2);
-            await updateTime('testuser123', 'Breakfast_New', new Date(2025, 2, 31, 6, 0,0), new Date(2025,2,31,6,30,0));
-            await updateDescription('testuser123', 'Breakfast_New', 'new breakfast description');
-            await addEvent('testuser123', 'testuser123_workout', 'Workout', 'exercise for the day', 'Gym', false, '',-1, start_time2, end_time2);
-            await addEvent('testuser123', 'testuser123_class', 'Class', 'class for the day', 'College Building 1', false, '',-1, new Date(2025, 3, 3, 10,30,0), new Date(2025,3,3,11,30,0));
-            await updateLocation('testuser123', 'Workout', 'Club Gym');
-            const x = await displayEvents('testuser123', 31, 3, 2025);
+            await addEvent(user_id, 'testuser123_delete', 'del_event', 'to be deleted', 'delete_location', true, 'weekly', 2, start_time, oneHourLater);
+            await removeEvent(user_id, 'del_event');
+            await updateTitle(user_id, 'breakfast', 'Breakfast_New');
+            await updateRecurrence(user_id, 'Breakfast_New', true, 'daily', 2);
+            await updateTime(user_id, 'Breakfast_New', new Date(2025, 2, 31, 6, 0,0), new Date(2025,2,31,6,30,0));
+            await updateDescription(user_id, 'Breakfast_New', 'new breakfast description');
+            await addEvent(user_id, 'testuser123_workout', 'Workout', 'exercise for the day', 'Gym', false, '',-1, start_time2, end_time2);
+            await addEvent(user_id, 'testuser123_class', 'Class', 'class for the day', 'College Building 1', false, '',-1, new Date(2025, 3, 3, 10,30,0), new Date(2025,3,3,11,30,0));
+            await updateLocation(user_id, 'Workout', 'Club Gym');
+            const x = await displayEvents(user_id, 31, 3, 2025);
             console.log(x);
-            await updateProfile('testuser123', 22, 'testuser1111111');
-            const y = await retrieveInfo('testuser123');
+            await updateProfile(user_id, 22, 'testuser1111111');
+            const y = await retrieveInfo(user_id);
             console.log(y);
-            const z = await findEvent('testuser123', 'Workout');
+            const z = await findEvent(user_id, 'Workout');
             console.log(z);
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('SignIn');
+            setUserID(user_id);
         } catch (error) {
             console.error('Error creating account:', error);
             Alert.alert('Error', `An error occurred while processing your request: ${error.message}`);
