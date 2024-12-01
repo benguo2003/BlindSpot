@@ -6,6 +6,8 @@ import AppContext from '../../contexts/appContext';
 import Navbar from '../../components/Navbar';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 
+import { FIREBASE_AUTH } from '../backend/FirebaseConfig';
+
 function Profile({ navigation }) {
     const { theme } = useContext(AppContext);
     const [profileImage, setProfileImage] = useState(null);
@@ -26,6 +28,17 @@ function Profile({ navigation }) {
             subscription.remove();
         };
     }, []);
+
+    const handleSignOut = async () => {
+        try {
+            await FIREBASE_AUTH.signOut();
+            navigation.navigate('SignIn');
+            console.log("You have signed out.");
+        } catch (error) {
+            Alert.alert('Error', 'Failed to sign out. Please try again.');
+            console.error('Sign out error:', error);
+        }
+    };
 
     const requestPermission = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -117,12 +130,11 @@ function Profile({ navigation }) {
             <View style={styles.header}>
                 <View style={styles.headerBox}>
                     <Text style={[styles.headerText, { fontFamily: theme.fonts.bold }]}>Your Profile</Text>
-                    <TouchableOpacity 
+                    <View 
                         style={styles.LogoContainer}
-                        onPress={() => navigation.navigate('SignIn')}
                     >
                         <Image source={Logo} style={styles.LogoImage} />
-                    </TouchableOpacity>
+                    </View>
                 </View>
             </View>
             <View style={styles.main}>
@@ -169,7 +181,7 @@ function Profile({ navigation }) {
                         </View>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.infoContainer}>
+                    <TouchableOpacity style={styles.infoContainer} onPress={() => handleSignOut()}>
                         <View style={styles.iconContainer}>
                             <LogOut stroke="white" size={24} />
                         </View>
