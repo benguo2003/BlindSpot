@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
     questionText: {
-        fontSize: 24,
+        fontSize: 20,
         color: '#333',
         marginBottom: 20,
     },
@@ -345,9 +345,10 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         borderRadius: 25,
         marginTop: 30,
+        border: 2,
     },
     doneButtonText: {
-        color: '#9B7FA7',
+        color: 'black',
         fontSize: 18,
         fontWeight: 'bold',
     },
