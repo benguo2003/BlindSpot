@@ -1,4 +1,5 @@
-// const { FIREBASE_DB, chatGPTRequest } = require('./FirebaseConfig');
+import {FIREBASE_DB, chatGPTRequest} from './FirebaseConfig';
+import {addEvent} from './addEvent';
 
 function getTaskHistory(user_id, tasks){
     // given a list of tasks (param), pull the time it took the user to complete task the last 3 or less times
@@ -113,9 +114,11 @@ function getTaskHistory(user_id, tasks){
       eventInstructions += `Here are the existing events:\n`;
   
       var events = getEvents(user_id);
+      var event_names = [];
       for (let i = 0; i < events.length; i++) {
           eventInstructions += JSON.stringify(events[i], null, 0);
           eventInstructions += '\n'
+          event_names.append(events[i].task_name);
       }
   
       switch (questionType) {
@@ -136,17 +139,38 @@ function getTaskHistory(user_id, tasks){
       }
   
       eventInstructions += `Only respond with the list of JSON objects, nothing else. The objects must be in order of chronological time.`
-  
-      console.log(eventInstructions)  
+
+      response = chatGPTRequest(eventInstructions);
+      return parseResponse(user_id, response, event_names);
+
   }
   
   
-  async function parseResponse(response){
-  
+  async function parseResponse(user_id, response, event_names){
+
+    const jsonArray = JSON.parse(response);
+    for (let i = 0; i < jsonArray.length; i++){
+        var event = jsonArray[i]
+        if (!event_names.includes(event.task_name)){
+            let recurring = (event.rec_freq === "none") ? false : true;
+            addEvent(user_id, 
+                    null, // event id
+                    event.task_name, 
+                    event.task_desc, 
+                    null, // location
+                    (event.rec_freq === "none") ? false : true,
+                    (event.rec_freq === "none") ? null : event.rec_freq, 
+                    (event.rec_freq === "none") ? 0 : event.rec_num, 
+                    event.start_time, 
+                    event.end_time)
+        }
+        
+    }
+    
   }
   
-  askGPT(null, 1, ["Laundry", "Folding Clothes"]);
-  askGPT(null, 2, ["Laundry", "Folding Clothes"]);
+//   askGPT(null, 1, ["Laundry", "Folding Clothes, Dishes"]);
+//   askGPT(null, 2, ["Laundry", "Folding Clothes, Dishes"]);
   
   
   
