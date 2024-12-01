@@ -63,7 +63,7 @@ async function updateRecurrence(user_id, event_title, recurring, recurrence_type
 
 }
 //start and end time parameters should be timestamps
-async function updateTime(user_id, event_title, start_time, end_time){
+export async function updateTime(user_id, event_title, start_time, end_time){
     try{
         //get the user calendar id
         const userRef = doc(FIREBASE_DB, 'users', user_id);
