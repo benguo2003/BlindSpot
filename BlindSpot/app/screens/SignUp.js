@@ -43,7 +43,7 @@ export default function SignUp({ navigation }) {
         }
 
         try {
-            let user_id = email + new Date().getTime().toString();
+            let user_id = email;
             await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
             await addUserToUsersCollection(user_id, email, 'testUser', 30); //hard coded userID and name for testing purposes...can change this later
             
