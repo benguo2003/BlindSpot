@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Image, Dimensions, TextInput, Button, StyleSheet, Alert, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, getDocs, query, where } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../backend/FirebaseConfig';
 import logo from '../../assets/images/blindSpotTextLogoTransparent.png';

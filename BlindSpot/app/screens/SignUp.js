@@ -10,6 +10,7 @@ import {addEvent} from '../backend/addEvent'
 import {removeEvent} from '../backend/removeEvent'
 import {updateTitle, updateRecurrence, updateTime, updateDescription, updateLocation, findEvent, displayEvents} from '../backend/updateEvent'
 import {updateProfile, retrieveInfo} from '../backend/updateProfile'
+import AppContext from '../../contexts/appContext';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
