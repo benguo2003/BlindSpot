@@ -26,7 +26,7 @@ export default function SignUp({ navigation }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [userID, setUserID] = useContext(AppContext);
+    const { userID, setUserID } = useContext(AppContext);
 
     const handleSignUp = async () => {
         if (!validateEmail(email)) {
