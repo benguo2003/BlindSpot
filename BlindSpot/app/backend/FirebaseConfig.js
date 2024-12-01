@@ -46,7 +46,7 @@ export const STORAGE = getStorage(FIREBASE_APP);
 
 //console.log(FIREBASE_API_KEY);
 
- async function chatGPTRequest(question) {
+ export async function chatGPTRequest(question) {
   const url = 'https://api.openai.com/v1/chat/completions';
   const headers = {
       'Content-Type': 'application/json',
