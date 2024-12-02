@@ -179,8 +179,9 @@ Details of Day:
     (2) task_name: This is the event that was modified
     (3) new_start: The new start time
     (4) new_end: The new end time
+    (5) isDelete: true/false value, if the event has been deleted or not
 */
-async function scheduleMod(user_id, task_name, new_start, new_end) {
+async function scheduleMod(user_id, task_name, new_start, new_end, isDelete) {
 
     async function parseResponse(user_id, response, microtask_events){
 
@@ -235,8 +236,16 @@ Details of Day:
         // TODO: If a task is a microtask, append its name to the microtasks array
     }
 
-    eventInstructions += `There has been a change to the event with task_name ${task_name}, it now has start_time ${new_start} and end_time ${new_end}.`
-    eventInstructions += `Please reorganize the day's events, to include all current events and account for this new time change. You can only move the following task_names: ${microtask_events.join('\n')}`
+    if (isDelete){
+        eventInstructions += `There has been a change to the event with task_name ${task_name}, it has now been deleted.`
+        if (microtask_events.includes(task_name)){
+            microtask_events = microtask_events.filter(item => item !== task_name);
+        }
+    } else {
+        eventInstructions += `There has been a change to the event with task_name ${task_name}, it now has start_time ${new_start} and end_time ${new_end}.`
+    }
+    
+    eventInstructions += `Please reorganize the day's events, to include all current events and account for this new change. You can only move the following task_names: ${microtask_events.join('\n')}`
 
     eventInstructions += `Only respond with the list of JSON objects, nothing else. The objects must be in order of chronological time.`
 
