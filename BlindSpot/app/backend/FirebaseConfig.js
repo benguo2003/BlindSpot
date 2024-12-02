@@ -44,9 +44,11 @@ export const FIREBASE_AUTH = getAuth(FIREBASE_APP);
 export const FIREBASE_DB = getFirestore(FIREBASE_APP);
 export const STORAGE = getStorage(FIREBASE_APP);
 
+module.exports = { FIREBASE_DB, chatGPTRequest };
+
 //console.log(FIREBASE_API_KEY);
 
- export async function chatGPTRequest(question) {
+export async function chatGPTRequest(system_prompt, question) {
   const url = 'https://api.openai.com/v1/chat/completions';
   const headers = {
       'Content-Type': 'application/json',
@@ -57,7 +59,8 @@ export const STORAGE = getStorage(FIREBASE_APP);
   const data = {
       model: 'gpt-3.5-turbo',
       messages: [
-          { role: 'user', content: question}
+        { role: 'system', content: system_prompt },
+        { role: 'user', content: question }
       ]
   };
   try {
