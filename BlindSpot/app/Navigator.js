@@ -9,6 +9,7 @@ import Calendar from './screens/Calendar';
 import Surveys from './screens/Surveys';
 import Profile from './screens/Profile';
 import ForgotPassword from './screens/ForgotPassword';
+import FirstSurvey from './screens/FirstSurvey'
 
 const Stack = createNativeStackNavigator();
 
@@ -72,6 +73,15 @@ function AppNavigator() {
             <Stack.Screen 
                 name="Profile" 
                 component={Profile} 
+                options = {{
+                    animation: 'fade',
+                    headerShown: false,
+                }}
+            />
+
+            <Stack.Screen 
+                name="FirstSurvey" 
+                component={FirstSurvey} 
                 options = {{
                     animation: 'fade',
                     headerShown: false,
