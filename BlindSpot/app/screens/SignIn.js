@@ -2,13 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Image, Dimensions, TextInput, Button, StyleSheet, Alert, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { collection, getDocs, query, where } from 'firebase/firestore';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../backend/FirebaseConfig';
 import logo from '../../assets/images/blindSpotTextLogoTransparent.png';
 import AppContext from '../../contexts/appContext';
 import Icon from 'react-native-vector-icons/Feather';
 import theme from '../style/themes.js';
+import {calendar2firebase} from '../backend/calendar2firebase.js'
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -47,7 +47,9 @@ export default function SignIn({ navigation }) {
 
             // Set user context
             setUserEmail(user.email);
-            setUserID(user.uid);
+            setUserID(user.email);
+
+            calendar2firebase(user.uid);
 
             // Navigate to home screen
             navigation.navigate('Home');

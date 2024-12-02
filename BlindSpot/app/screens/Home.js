@@ -37,7 +37,7 @@ const PRIORITY_FACTORS = {
 
 function Home() {
     const navigation = useNavigation();
-    const { theme } = useContext(AppContext);
+    const { theme, userID } = useContext(AppContext);
 
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
@@ -50,6 +50,8 @@ function Home() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [eventNote, setEventNote] = useState('');
+
+    console.log("User ID: " + userID);
 
     const mockEvents = [
         // Monday Nov 20
