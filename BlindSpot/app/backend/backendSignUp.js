@@ -26,6 +26,17 @@ async function addUserToUsersCollection(userID, email, name, age){
             name: calendar_name,
         })
         console.log(`User "${name}" added with calendar id "${calendar_id}".`);
+
+        const initial_data = {
+            laundry: {time_history: []},
+            meditation: {time_history: []},
+            exercise: {time_history: []},
+            trash: {time_history: []},
+            dishes: {time_history: []},
+            groceries: {time_history: []},
+        }
+        await setDoc(doc(FIREBASE_DB, 'gptconext', userID), initial_data);
+        console.log('microtasks initialized');
     }
     catch (error) {
         console.log(error);
