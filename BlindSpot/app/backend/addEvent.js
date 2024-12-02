@@ -10,7 +10,7 @@ async function addEvent(user_id, event_id, title, description, location, recurri
 
         const event_ref = doc(FIREBASE_DB, 'events', event_id);
         await setDoc(event_ref,{
-            calendar_id: calendar_id,
+            calendar_id: user_id + '_calendar',
             title: title,
             description: description,
             location: location,
