@@ -209,19 +209,18 @@ async function displayEvents(user_id, day, month, year) {
         }
         
         const calendar_id = userSnap.data().calendar_id;
+        const events = [];
 
+        // Get regular events
         const eventQuery = query(
             collection(FIREBASE_DB, 'events'),
             where('calendar_id', '==', calendar_id)
         );
         
         const queryResult = await getDocs(eventQuery);
-        const events = [];
 
         queryResult.forEach(doc => {
             const data = doc.data();
-            
-            // Safely convert Firebase Timestamp to Date
             const date_start = data.start_time?.toDate();
             const date_end = data.end_time?.toDate();
             
@@ -247,8 +246,59 @@ async function displayEvents(user_id, day, month, year) {
             }
         });
 
+        // Get recurring events
+        const recurringQuery = query(
+            collection(FIREBASE_DB, 'recurring'),
+            where('calendar_id', '==', calendar_id)
+        );
+
+        console.log("Recurrence query:", recurringQuery);
+
+        const recurringResult = await getDocs(recurringQuery);
+        const targetDate = new Date(year, month, day);
+        const targetDayIndex = targetDate.getDay(); // 0 for Sunday, 6 for Saturday
+
+        recurringResult.forEach(doc => {
+            console.log("Successful recurring query: " + doc.data());
+            const data = doc.data();
+            const start_date = data.start_date?.toDate();
+            const end_date = data.end_date?.toDate();
+            console.log("Target: " + data.days[targetDayIndex]);
+            
+            if (!start_date || !end_date || !data.days || data.days[targetDayIndex] !== 1) {
+                return;
+            }
+
+            // Check if target date is within range
+            if (targetDate >= start_date && targetDate <= end_date) {
+                // Check week frequency
+                const weeksDiff = Math.floor((targetDate - start_date) / (7 * 24 * 60 * 60 * 1000));
+                if (weeksDiff % (data.week_frequency || 1) === 0) {
+                    // Create event instance for this day
+                    const eventStartTime = new Date(year, month, day, 
+                        data.start_time.toDate().getHours(),
+                        data.start_time.toDate().getMinutes());
+                    
+                    const eventEndTime = new Date(year, month, day,
+                        data.end_time.toDate().getHours(),
+                        data.end_time.toDate().getMinutes());
+
+                    events.push({
+                        id: doc.id + '_' + targetDate.toISOString(),
+                        title: data.title || 'Untitled Event',
+                        description: data.description || '',
+                        location: data.location || '',
+                        start_time: eventStartTime,
+                        end_time: eventEndTime,
+                        change: data.change || 0,
+                        category: data.category || 'Uncategorized'
+                    });
+                }
+            }
+        });
+
         console.log(`Found ${events.length} events for ${month}/${day}/${year}`);
-        return events;
+        return events.sort((a, b) => a.start_time - b.start_time);
     } catch (error) {
         console.error('Error retrieving events: ', error);
         return [];

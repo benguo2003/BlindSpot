@@ -28,17 +28,18 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const CATEGORY_COLORS = {
     Imports: ['#B39CD0', '#9B7FC1'],    // Purple theme
-    Routine: ['#9DC0D0', '#7FA3C1'],    // Blue-ish
+    Microtask: ['#9DC0D0', '#7FA3C1'],    // Blue-ish
     Leisure: ['#D09CB3', '#C17F96'],    // Pink-ish
-    Work: ['#D0C29C', '#C1A67F'],       // Yellow-ish
+    Work: ['#D0C29C', '#C1A67F'],       // Yellow-ish 
+    Sleep: ['#D0D0D0', '#A0A0A0'],       // Gray-ish
     Default: ['#D3D3D3', '#A9A9A9'],    // Gray theme for unrecognized categories
 };
 
 
 const PRIORITY_FACTORS = {
-    1: 1.2,  // Lighter
-    2: 1.0,  // Base color
-    3: 0.8,  // Darker
+    2: 1.2,  // Lighter
+    1: 1.0,  // Base color
+    0: 0.8,  // Darker
 };
 
 
@@ -683,6 +684,15 @@ function Home() {
                                             <Text style={modalStyle.modalTime}>
                                                 {formatTime(selectedEvent.start_time)} - {formatTime(selectedEvent.end_time)}
                                             </Text>
+
+                                            <View style={modalStyle.locationContainer}>
+                                                <Text style={modalStyle.locationLabel}>Location:</Text>
+                                                <Text style={modalStyle.locationText}>
+                                                    {selectedEvent.location && typeof selectedEvent.location === 'object' 
+                                                        ? `${selectedEvent.location._lat}° N, ${selectedEvent.location._long}° E`
+                                                        : selectedEvent.location || 'No location specified'}
+                                                </Text>
+                                            </View>
                                             
                                             <View style={modalStyle.notesSection}>
                                                 <View style={modalStyle.notesHeader}>
@@ -1113,6 +1123,19 @@ const modalStyle = StyleSheet.create({
     },
     notesInputDisabled: {
         backgroundColor: '#f8f8f8',
+        color: '#666',
+    },
+    locationContainer: {
+        marginBottom: 20,
+    },
+    locationLabel: {
+        fontSize: 16,
+        color: '#333',
+        fontWeight: 'bold',
+        marginBottom: 5,
+    },
+    locationText: {
+        fontSize: 16,
         color: '#666',
     },
 });
