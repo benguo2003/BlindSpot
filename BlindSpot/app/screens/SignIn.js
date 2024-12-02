@@ -50,7 +50,7 @@ export default function SignIn({ navigation }) {
             setUserID(user.email);
 
             // Navigate to home screen
-            navigation.navigate('Home');
+            navigation.navigate('FirstSurvey');
         } catch (error) {
             Alert.alert('Login Error', error.message);
         } finally {

@@ -47,7 +47,7 @@ export default function SignUp({ navigation }) {
             await addUserToUsersCollection(user_id, email, 'testUser', 30);
             
             Alert.alert('Success', 'Account created successfully!');
-            navigation.navigate('SignIn');
+            navigation.navigate('FirstSurvey');
             setUserID(user_id);
             //calendar2firebase(user_id);
         } catch (error) {
