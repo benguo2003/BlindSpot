@@ -46,7 +46,7 @@ export default function SignIn({ navigation }) {
 
             // Set user context
             setUserEmail(user.email);
-            setUserID(user.uid);
+            setUserID(user.email);
 
             // Navigate to home screen
             navigation.navigate('Home');
