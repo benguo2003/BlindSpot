@@ -32,9 +32,10 @@ async function calendar2firebase(user_id)
                                 title: event.title,
                                 description: event.description,
                                 location: event.location,
-                                start_time: event.startDate,
-                                end_time: event.endDate,
+                                start_time: new Date(event.startDate),
+                                end_time: new Date(event.endDate),
                                 change: 1,
+                                category: "Imports"
                             }
 
                             addEvent(user_id, event_obj, null);

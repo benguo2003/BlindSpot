@@ -15,6 +15,7 @@ async function addEvent(user_id, single_time_event, recurring_event) {
                 start_time: single_time_event.start_time,
                 end_time: single_time_event.end_time,
                 change: single_time_event.change,
+                category: single_time_event.category,
                 
             });
             console.log(`Single Time Event: "${single_time_event.title}" added successfully.`);
@@ -34,6 +35,7 @@ async function addEvent(user_id, single_time_event, recurring_event) {
                 start_date: recurring_event.start_date,
                 end_date: recurring_event.end_date,
                 week_frequency: recurring_event.week_frequency,
+                category: recurring_event.category,
             });
             console.log(`Recurring Event: "${single_time_event.title}" added successfully.`);
         }
