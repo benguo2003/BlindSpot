@@ -37,7 +37,7 @@ async function addEvent(user_id, single_time_event, recurring_event) {
                 week_frequency: recurring_event.week_frequency,
                 category: recurring_event.category,
             });
-            console.log(`Recurring Event: "${single_time_event.title}" added successfully.`);
+            console.log(`Recurring Event: "${recurring_event.title}" added successfully.`);
         }
         else {
             console.error("No event data provided.");

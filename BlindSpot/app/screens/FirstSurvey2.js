@@ -1,18 +1,11 @@
-import React, { useState, useRef, useContext, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { View, Dimensions, Text, StyleSheet, TouchableOpacity, Animated, TextInput, ScrollView} from 'react-native';
 import Confetti from 'react-native-confetti';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Book, Briefcase } from 'react-native-feather';
 
-import AppContext from '../../contexts/appContext';
-
-import { updateProfileObject, retrieveInfo } from '../backend/updateProfile';
-import { addEvent } from '../backend/addEvent';
-
 const { height } = Dimensions.get('window');
-
-
 
 const days = [     
     "Monday",
@@ -26,30 +19,63 @@ const days = [
 
 const mockQuestions = [
     {
+        id: 0,
+        question: "Hi there! Welcome to BlindSpot. What can we call you?",
+        type: "input",
+        placeholder: "Enter your name",
+        inputType: "text"
+    },
+    {
         id: 1,
         question: "Are you a:",
         type: "choice",
-        options: ["Student", "Adult"]
+        options: ["College Student", "Adult"]
     },
     {
         id: 2,
         question: "What is your age?",
         type: "input",
-        placeholder: "Enter your age"
+        placeholder: "Enter your age",
+        inputType: "number"
     },
     {
         id: 3,
-        question: "What days and hours do you work?",
+        question: "What is your work schedule?",
         type: "schedule",
-        days: [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
+        description: "Set your recurring work hours for each day",
+        scheduleType: "work"
+    },
+    {
+        id: 4,
+        question: "What is your sleep schedule?",
+        type: "schedule",
+        description: "Set your typical sleeping hours",
+        scheduleType: "sleep"
+    },
+    {
+        id: 5,
+        question: "What is your class schedule?",
+        type: "classSchedule",
+        description: "Add your classes for each day",
+        conditional: "College Student"
+    },
+    {
+        id: 6,
+        question: "How long do these tasks typically take you?",
+        type: "duration",
+        tasks: [
+            { name: "Laundry", placeholder: "Minutes" },
+            { name: "Taking trash out", placeholder: "Minutes" },
+            { name: "Dishes", placeholder: "Minutes" },
+            { name: "Getting ready (shower, etc.)", placeholder: "Minutes" }
         ]
+    },
+    {
+        id: 7,
+        question: "Would you like to import your device's calendar?",
+        type: "choice",
+        options: ["Yes", "No"],
+        description: "This helps us better understand your schedule"
     }
 ];
 
@@ -60,104 +86,86 @@ function FirstSurvey() {
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const confettiRef = useRef();
     const [showCompletion, setShowCompletion] = useState(false);
-    const { userID } = useContext(AppContext);
-    const [profile, setProfile] = useState({});
-
-    useEffect(() => {
-        if (userID) {
-            retrieveInfo(userID)
-                .then(userData => setProfile(userData))
-                .catch(error => console.error('Error fetching profile:', error));
-        }
-    }, [userID]);
-    
-
-    console.log(profile);
+    const [userType, setUserType] = useState(null);
 
     const [schedule, setSchedule] = useState({
-        Monday: { active: false, start: '9:00 AM', end: '5:00 PM' },
-        Tuesday: { active: false, start: '9:00 AM', end: '5:00 PM' },
-        Wednesday: { active: false, start: '9:00 AM', end: '5:00 PM' },
-        Thursday: { active: false, start: '9:00 AM', end: '5:00 PM' },
-        Friday: { active: false, start: '9:00 AM', end: '5:00 PM' },
-        Saturday: { active: false, start: '9:00 AM', end: '5:00 PM' },
-        Sunday: { active: false, start: '9:00 AM', end: '5:00 PM' }
+        Monday: { works: false, start: '9:00 AM', end: '5:00 PM' },
+        Tuesday: { works: false, start: '9:00 AM', end: '5:00 PM' },
+        Wednesday: { works: false, start: '9:00 AM', end: '5:00 PM' },
+        Thursday: { works: false, start: '9:00 AM', end: '5:00 PM' },
+        Friday: { works: false, start: '9:00 AM', end: '5:00 PM' },
+        Saturday: { works: false, start: '9:00 AM', end: '5:00 PM' },
+        Sunday: { works: false, start: '9:00 AM', end: '5:00 PM' }
     });
+
+    const [workSchedule, setWorkSchedule] = useState({...schedule});
+    const [sleepSchedule, setSleepSchedule] = useState({...schedule});
+    const [classSchedule, setClassSchedule] = useState({...schedule});
     
     const cardPositions = mockQuestions.map((_, index) => 
         React.useRef(new Animated.Value(index === 0 ? 0 : Dimensions.get('window').width)).current
     );
 
-    const handleAnswer = (answer, type, day, field) => {
-        if (type === "schedule") {
-            setSchedule(prev => ({
+    const handleAnswer = (answer, type = 'input', day, field) => {
+        if (type === "schedule" || type === "classSchedule") {
+            const currentSchedule = type === "schedule" ? 
+                (mockQuestions[currentIndex].scheduleType === "work" ? workSchedule : sleepSchedule) : 
+                classSchedule;
+            const setScheduleFunction = type === "schedule" ? 
+                (mockQuestions[currentIndex].scheduleType === "work" ? setWorkSchedule : setSleepSchedule) : 
+                setClassSchedule;
+    
+            setScheduleFunction(prev => ({
                 ...prev,
                 [day]: {
                     ...prev[day],
-                    [field === 'works' ? 'active' : field]: field === 'works' ? !prev[day].active : answer
+                    [field]: field === 'works' ? !prev[day].works : answer
                 }
             }));
-            setSelectedAnswer('modified');
+            setSelectedAnswer(JSON.stringify(currentSchedule));
+        } else if (type === "duration") {
+            return (
+                <Animated.View style={[styles.questionCard, style]}>
+                    <Text style={styles.questionText}>{question}</Text>
+                    <ScrollView style={styles.durationContainer}>
+                        {question.tasks.map((task, index) => (
+                            <View key={index} style={styles.taskContainer}>
+                                <Text style={styles.taskText}>{task.name}</Text>
+                                <View style={styles.durationInputContainer}>
+                                    <TextInput
+                                        style={styles.durationInput}
+                                        placeholder={task.placeholder}
+                                        value={selectedAnswer?.[task.name]}
+                                        onChangeText={(value) => handleAnswer(value, 'duration', null, task.name)}
+                                        keyboardType="numeric"
+                                        maxLength={3}
+                                    />
+                                    <Text style={styles.durationUnit}>min</Text>
+                                </View>
+                            </View>
+                        ))}
+                    </ScrollView>
+                    <TouchableOpacity 
+                        style={[styles.nextButton, !selectedAnswer && styles.nextButtonDisabled]}
+                        onPress={handleNext}
+                    >
+                        <Text style={styles.nextButtonText}>Next</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            );
         } else {
+            if (currentIndex === 1) { // User type question
+                setUserType(answer);
+            }
             setSelectedAnswer(answer);
         }
     };
 
-    const handleNext = async () => {
+    const handleNext = () => {
         if (!selectedAnswer) return;
-        setAnswers((prev) => ({ ...prev, [currentIndex]: selectedAnswer }));
-    
-        // Check if we're at the last question
+        setAnswers(prev => ({...prev, [currentIndex]: selectedAnswer}));
+
         if (currentIndex === mockQuestions.length - 1) {
-            // Prepare the profile object
-            const updatedProfile = {
-                ...profile, // Include existing profile data
-                age: parseInt(answers[1], 10) || profile.age, // Use answers or fallback to existing data
-                userType: answers[0], // Student or Adult
-                
-            };
-
-            // Add the schedule to the events as a recurring event
-            const daysArray = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-            const daysFormat = daysArray.map(day => schedule[day]?.active ? 1 : 0);
-
-            // Parse time accounting for AM/PM
-            const parseTimeWithPeriod = (timeStr) => {
-                const [time, period] = timeStr.split(' ');
-                let [hours, minutes] = time.split(':').map(Number);
-                if (period === 'PM' && hours !== 12) hours += 12;
-                if (period === 'AM' && hours === 12) hours = 0;
-                return { hours, minutes };
-            };
-
-            const startTime = parseTimeWithPeriod(schedule.Monday.start);
-            const endTime = parseTimeWithPeriod(schedule.Monday.end);
-
-            const recurringEvent = {
-                calendar_id: userID + '_calendar',
-                title: 'Work Schedule',
-                description: 'Your work schedule',
-                location: '',
-                start_date: new Date(2000, 0, 1),
-                end_date: new Date(2100, 11, 31),
-                start_time: new Date(2000, 0, 1, startTime.hours, startTime.minutes),
-                end_time: new Date(2000, 0, 1, endTime.hours, endTime.minutes),
-                change: 0,
-                days: daysFormat,
-                week_frequency: 1,
-                category: 'Work',
-            };
-    
-            try {
-                // Call the updateProfileObject function
-                await updateProfileObject(userID, updatedProfile);
-                await addEvent(userID, null, recurringEvent);
-                console.log('Profile updated successfully');
-            } catch (error) {
-                console.error('Failed to update profile:', error);
-            }
-    
-            // Show completion screen
             Animated.timing(cardPositions[currentIndex], {
                 toValue: -Dimensions.get('window').width * 1.5,
                 duration: 300,
@@ -170,8 +178,7 @@ function FirstSurvey() {
             });
             return;
         }
-    
-        // Proceed to the next question
+
         Animated.parallel([
             Animated.timing(cardPositions[currentIndex], {
                 toValue: -Dimensions.get('window').width * 1.5,
@@ -182,16 +189,70 @@ function FirstSurvey() {
                 toValue: 0,
                 duration: 300,
                 useNativeDriver: true,
-            }),
+            })
         ]).start(() => {
-            setCurrentIndex((prev) => prev + 1);
+            setCurrentIndex(prev => prev + 1);
             setSelectedAnswer(null);
         });
     };
+
+    function InputQuestion({ question, placeholder, keyboardType, maxLength }) {
+        const [text, setText] = useState('');
     
+        return (
+            <View style={styles.questionContent}>
+                <Text style={styles.questionText} numberOfLines={3}>{question}</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder={placeholder}
+                    value={text}
+                    onChangeText={setText}
+                    keyboardType={keyboardType}
+                    maxLength={maxLength}
+                    autoFocus
+                />
+                <TouchableOpacity 
+                    style={[styles.nextButton, !text && styles.nextButtonDisabled]}
+                    onPress={() => {
+                        if (text) {
+                            handleAnswer(text);
+                            handleNext();
+                        }
+                    }}
+                    disabled={!text}
+                >
+                    <Text style={styles.nextButtonText}>Next</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     const QuestionCard = ({ question, options, type, placeholder, style, days }) => {
-        if (type === "schedule") {
+        const [inputValue, setInputValue] = useState('');
+        const inputRef = useRef(null);
+
+        const handleInputChange = (text) => {
+            setInputValue(text);
+            handleAnswer(text);
+        };
+
+        if (type === 'input') {
+            return (
+                <Animated.View style={[styles.questionCard, style]}>
+                    <InputQuestion
+                        question={question}
+                        placeholder={placeholder}
+                        keyboardType={question.inputType === 'number' ? 'number-pad' : 'default'}
+                        maxLength={question.inputType === 'number' ? 3 : 50}
+                    />
+                </Animated.View>
+            );
+        }
+        else if (type === "schedule") {
+            const currentSchedule = type === "schedule" ? 
+                (mockQuestions[currentIndex].scheduleType === "work" ? workSchedule : sleepSchedule) : 
+                classSchedule;
+        
             return (
                 <Animated.View style={[styles.questionCard, style]}>
                     <Text style={styles.questionText}>{question}</Text>
@@ -203,20 +264,20 @@ function FirstSurvey() {
                                     <TouchableOpacity
                                         style={[
                                             styles.workToggle,
-                                            schedule[day].active && styles.workToggleActive
+                                            currentSchedule[day].works && styles.workToggleActive
                                         ]}
                                         onPress={() => handleAnswer(null, "schedule", day, "works")}
                                     >
                                         <Text style={[
                                             styles.workToggleText,
-                                            schedule[day].active && styles.workToggleTextActive
+                                            currentSchedule[day].works && styles.workToggleTextActive
                                         ]}>
-                                            {schedule[day].active ? 'Working' : 'Not Working'}
+                                            {currentSchedule[day].works ? 'Working' : 'Not Working'}
                                         </Text>
                                     </TouchableOpacity>
                                 </View>
                                 
-                                {schedule[day].active && (
+                                {currentSchedule[day].works && (
                                     <View style={styles.timeContainer}>
                                         <View style={styles.timePickerContainer}>
                                             <Text style={styles.timeLabel}>Start:</Text>
@@ -384,9 +445,9 @@ function FirstSurvey() {
                         style={styles.input}
                         placeholder={placeholder}
                         value={selectedAnswer}
-                        onChangeText={handleAnswer}
-                        keyboardType="number-pad"
-                        maxLength={3}
+                        onChangeText={(text) => handleAnswer(text)}
+                        keyboardType={question.inputType === 'number' ? 'number-pad' : 'default'}
+                        maxLength={question.inputType === 'number' ? 3 : 50}
                     />
                 )}
     
@@ -718,6 +779,45 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 14,
         fontWeight: '500',
+    },
+    durationContainer: {
+        flex: 1,
+        marginBottom: 20,
+    },
+    taskContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#F5F0F7',
+        padding: 15,
+        borderRadius: 12,
+        marginBottom: 10,
+    },
+    taskText: {
+        fontSize: 16,
+        color: '#333',
+        flex: 1,
+    },
+    durationInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    durationInput: {
+        width: 80,
+        height: 40,
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: '#D1C1DB',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    durationUnit: {
+        fontSize: 14,
+        color: '#666',
+        marginLeft: 4,
     },
 });
 
