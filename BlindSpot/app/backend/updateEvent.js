@@ -1,7 +1,25 @@
 import { FIREBASE_APP, FIREBASE_DB } from "./FirebaseConfig";
 import { doc, getDoc, query, where, getDocs, updateDoc, collection } from "firebase/firestore";
 
+async function updateEvent(event_to_update, new_event_data){
+    try{
+        const eventQuery = query(collection(FIREBASE_DB, 'events'),
+        where('calendar_id', '==', new_event_data.calendar_id),
+        where('title', '==', event_to_update));
+        const queryResult = await getDocs(eventQuery);
+        queryResult.forEach(async (eventDoc) =>{
+            const eventRef = doc(FIREBASE_DB, 'events', eventDoc.id)
+            await updateDoc(eventRef,new_event_data);
+        });
+        console.log(`Event title updated to "${newTitle}".`);
+        return true;
+    } catch(error){
+        console.error('error updating event: ', error);
+        return false;
+    }
+}
 // given the user id, old event title, and new event title (strings)
+/*
 async function updateTitle(user_id, oldTitle, newTitle){
     try{
         //get the user calendar id
@@ -153,7 +171,7 @@ async function updateLocation(user_id, event_title, new_location){
     
 }
 //all update functions return boolean for whether or not the function was successful or not
-
+*/
 //both string parameters
 async function findEvent(user_id, event_title){
     try{
@@ -168,26 +186,36 @@ async function findEvent(user_id, event_title){
             where('title', '==', event_title)
         );
         // make the update
-        const queryResult = await getDocs(eventQuery);
+        const queryResult = await getDoc(eventQuery);
         const event_data = [];
+        if(queryResult.exists()){
         queryResult.forEach(async (doc) =>{
             const data = doc.data();
-            const start_time = data.start_time.toDate();
-            const end_time = data.end_time.toDate();
+            const start_time = data.start_time;
+            const end_time = data.end_time;
             event_data.push({
                 id: doc.id,
                 title: data.title,
                 description: data.description,
                 location: data.location,
-                start_time: start_time.toLocaleString(),
-                end_time: end_time.toLocaleString(),
-                recurring: data.recurring,
-                recurrence_type: data.recurrence_type,
-                recurrence_num: data.recurrence_num,
+                start_time: start_time,
+                end_time: end_time,
+                change: data.change,
             });
         });
         console.log(`Event retrieved.`);
         return event_data;  
+        }
+        else{
+            const rec_query = query(collection(FIREBASE_DB, 'recurring'),
+            where('calendar_id', '==', calendar_id),
+            where('title','==', event_title));
+            const rec_result = await getDoc(rec_query);
+            rec_result.forEach(async (document) =>{
+
+            })
+
+        }
         } catch(error){
         console.error('Error retrieving event: ', error);
         return false;
@@ -203,7 +231,6 @@ async function displayEvents(user_id, day, month, year){
         const userRef = doc(FIREBASE_DB, 'users', user_id);
         const userSnap = await getDoc(userRef);
         const calendar_id = userSnap.data().calendar_id;
-        //search the events collection for the desired event to update
         const eventQuery = query(
             collection(FIREBASE_DB, 'events'),
             where('calendar_id', '==', calendar_id)
@@ -225,18 +252,50 @@ async function displayEvents(user_id, day, month, year){
                     location: data.location,
                     start_time: date_start.toLocaleString(),
                     end_time: date_end.toLocaleString(),
-                    recurring: data.recurring,
-                    recurrence_type: data.recurrence_type,
-                    recurrence_num: data.recurrence_num,
+                    change: change,
                 });
-            }
-            
+            } 
         });
-        console.log(`Events retrieved.`);
-        return events;
+        console.log('non-recurring events retrieved');
+
         } catch(error){
-        console.error('Error retrieving events: ', error);
+        console.error('Error retrieving non-recurring events: ', error);
         return false;
+        }
+
+        try{
+            const date = new Date(year, month - 1, day);
+            const userRef = doc(FIREBASE_DB, 'users', user_id);
+            const userSnap = await getDoc(userRef);
+            const calendar_id = userSnap.data().calendar_id;
+            //search the events collection for the desired event to update
+            const recQuery = query(
+                collection(FIREBASE_DB, 'recurring'),
+                where('calendar_id', '==', calendar_id)
+            );
+            const queryResult = await getDocs(recQuery);
+            queryResult.forEach(async (document) =>{
+                const data = document.data();
+                const start_date = data.start_date;
+                const end_date = data.end_date;
+                if(date >= start_date && date <= end_date)
+                {
+                    if(data.week_times[date.getDay()] !={}){
+                    events.push(Object.assign({},{
+                        id: doc.id,
+                        title: data.title,
+                        description: data.description,
+                        location: data.location,
+                        change: change,
+                    }, data.week_times[date.getDay()]));
+                }
+            }
+                
+            });
+        }catch(error_1)
+        {
+            console.error('error retrieving recurring events', error_1);
+            return false;
         }
 } //returns a list of json objects with each json having each of the event fields (title, description, start and end times, etc.)
 //end time and start time edited in the function so the output is readable (same format as find_event)

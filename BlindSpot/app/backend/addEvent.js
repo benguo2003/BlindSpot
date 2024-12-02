@@ -1,30 +1,14 @@
 import { FIREBASE_DB} from './FirebaseConfig';
-import {doc, setDoc, getDoc} from 'firebase/firestore';
-async function addEvent(user_id, event_id, title, description, location, recurring, recurrence_type, recurrence_num, start_time, end_time)
+import {doc, addDoc, collection, setDoc, getDoc} from 'firebase/firestore';
+async function addEvent(event_data)
 {
     try{
-        const userRef = doc(FIREBASE_DB, 'users', user_id);
-        const userSnap = await getDoc(userRef);
-
-        const calendar_id = userSnap.data().calendar_id;
-
-        const event_ref = doc(FIREBASE_DB, 'events', event_id);
-        await setDoc(event_ref,{
-            calendar_id: calendar_id,
-            title: title,
-            description: description,
-            location: location,
-            recurring: recurring,
-            recurrence_type: recurrence_type,
-            recurrence_num: recurrence_num,
-            start_time: start_time,
-            end_time: end_time,
-        }
-        );
-        console.log(`Event "${title}" added successfully.`);
+        const event_ref = collection(FIREBASE_DB, 'events');
+        await addDoc(event_ref,event_data);
+        console.log(`Event "${event_data.title}" added successfully.`);
         return {
             success: true,
-            message: `Event "${title}" added successfully.`,
+            message: `Event "${event_data.title}" added successfully.`,
         };
     }
     catch(error){
@@ -34,6 +18,23 @@ async function addEvent(user_id, event_id, title, description, location, recurri
             message: "An error occurred adding this event",
         };
     }
+    }
+async function addRecurringEvent(event_data){
+    try{
+        const event_ref = collection(FIREBASE_DB, 'recurring');
+        await addDoc(event_ref,event_data);
+        console.log(`Recurring event "${event_data.title}" added successfully.`);
+        return {
+            success: true,
+            message: `Recurring event "${event_data.title}" added successfully.`,
+        };
+    }
+    catch(error){
+        console.error("Error adding  recurring event to collection: ", error);
+        return{
+            success: false,
+            message: "An error occurred adding this event",
+        };
+    }
 }
-
-export {addEvent};
+export {addEvent, addRecurringEvent};
