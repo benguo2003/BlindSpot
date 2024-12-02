@@ -28,7 +28,16 @@ async function calendar2firebase(user_id)
                         }
                         
                         if (!event.isRecurring) {
-                            addEvent(user_id, event.title, event.description, event.location, event.startDate, event.endDate);
+                            const event_obj = {
+                                title: event.title,
+                                description: event.description,
+                                location: event.location,
+                                start_time: event.startDate,
+                                end_time: event.endDate,
+                                change: 1,
+                            }
+
+                            addEvent(user_id, event_obj, null);
                         }
                     }
                 }

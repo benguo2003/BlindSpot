@@ -1,5 +1,5 @@
 import { FIREBASE_DB } from './FirebaseConfig';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, addDoc, getDoc, collection } from 'firebase/firestore';
 
 async function addEvent(user_id, single_time_event, recurring_event) {
     try {
@@ -7,8 +7,7 @@ async function addEvent(user_id, single_time_event, recurring_event) {
 
         if (single_time_event !== null) {
             console.log("Adding Single Time Event");
-            const event_ref = doc(FIREBASE_DB, 'events');
-            await setDoc(event_ref, {
+            await addDoc(collection(FIREBASE_DB, 'events'), {
                 calendar_id: calendar_id,
                 title: single_time_event.title,
                 description: single_time_event.description,
@@ -22,8 +21,8 @@ async function addEvent(user_id, single_time_event, recurring_event) {
         }
         else if (recurring_event !== null) {
             console.log("Adding Recurring Event");
-            const recurring_ref = doc(FIREBASE_DB, 'recurring');
-            await setDoc(recurring_ref, {
+
+            await addDoc(collection(FIREBASE_DB, 'recurring'), {
                 calendar_id: calendar_id,
                 title: recurring_event.title,
                 description: recurring_event.description,
