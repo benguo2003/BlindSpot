@@ -7,6 +7,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import theme from '../style/themes.js';
 import {addUserToUsersCollection} from '../backend/backendSignUp';
 import AppContext from '../../contexts/appContext';
+import {calendar2firebase} from '../backend/calendar2firebase.js'
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -48,6 +49,7 @@ export default function SignUp({ navigation }) {
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('SignIn');
             setUserID(user_id);
+            //calendar2firebase(user_id);
         } catch (error) {
             console.error('Error creating account:', error);
             Alert.alert('Error', `An error occurred while processing your request: ${error.message}`);

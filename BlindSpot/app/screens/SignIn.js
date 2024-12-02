@@ -49,8 +49,6 @@ export default function SignIn({ navigation }) {
             setUserEmail(user.email);
             setUserID(user.email);
 
-            calendar2firebase(user.uid);
-
             // Navigate to home screen
             navigation.navigate('Home');
         } catch (error) {
