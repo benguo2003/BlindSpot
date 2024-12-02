@@ -45,7 +45,6 @@ export default function SignUp({ navigation }) {
             let user_id = email;
             await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
             await addUserToUsersCollection(user_id, email, 'testUser', 30);
-            
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('FirstSurvey');
             setUserID(user_id);
