@@ -1,40 +1,53 @@
 import { FIREBASE_DB } from './FirebaseConfig';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
-async function addEvent(user_id, title, description, location, recurring, recurrence_type, recurrence_num, start_time, end_time) {
+async function addEvent(user_id, single_time_event, recurring_event) {
     try {
-        const userRef = doc(FIREBASE_DB, 'users', user_id);
-        const userSnap = await getDoc(userRef);
+        const calendar_id = user_id + "_calendar";
 
-        if (!userSnap.exists()) {
-            console.error("User does not exist.");
+        if (single_time_event !== null) {
+            console.log("Adding Single Time Event");
+            const event_ref = doc(FIREBASE_DB, 'events');
+            await setDoc(event_ref, {
+                calendar_id: calendar_id,
+                title: single_time_event.title,
+                description: single_time_event.description,
+                location: single_time_event.location,
+                start_time: single_time_event.start_time,
+                end_time: single_time_event.end_time,
+                change: single_time_event.change,
+                
+            });
+            console.log(`Single Time Event: "${single_time_event.title}" added successfully.`);
+        }
+        else if (recurring_event !== null) {
+            console.log("Adding Recurring Event");
+            const recurring_ref = doc(FIREBASE_DB, 'recurring');
+            await setDoc(recurring_ref, {
+                calendar_id: calendar_id,
+                title: recurring_event.title,
+                description: recurring_event.description,
+                location: recurring_event.location,
+                start_time: recurring_event.start_time,
+                end_time: recurring_event.end_time,
+                change: recurring_event.change,
+                days: recurring_event.days,
+                start_date: recurring_event.start_date,
+                end_date: recurring_event.end_date,
+                week_frequency: recurring_event.week_frequency,
+            });
+            console.log(`Recurring Event: "${single_time_event.title}" added successfully.`);
+        }
+        else {
+            console.error("No event data provided.");
             return {
                 success: false,
-                message: "User does not exist.",
+                message: "No event data provided.",
             };
         }
-
-        const calendar_id = userSnap.data().calendar_id;
-
-        // Generate a new document reference without an event_id; Firestore will automatically generate one
-        const event_ref = doc(FIREBASE_DB, 'events'); // Firestore generates a random event_id
-
-        await setDoc(event_ref, {
-            calendar_id: calendar_id,
-            title: title,
-            description: description,
-            location: location,
-            recurring: recurring,
-            recurrence_type: recurrence_type,
-            recurrence_num: recurrence_num,
-            start_time: start_time,
-            end_time: end_time,
-        });
-
-        console.log(`Event "${title}" added successfully.`);
         return {
             success: true,
-            message: `Event "${title}" added successfully.`,
+            message: `Event added successfully.`,
         };
     } catch (error) {
         console.error("Error adding event to collection: ", error);
@@ -46,3 +59,4 @@ async function addEvent(user_id, title, description, location, recurring, recurr
 }
 
 export { addEvent };
+

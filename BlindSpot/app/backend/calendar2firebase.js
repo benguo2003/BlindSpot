@@ -15,7 +15,6 @@ async function calendar2firebase(user_id)
                 if (events.length > 0) {
                     console.log(`Events in ${calendar.title} from the last month:`);
                     for (const event of events) {
-                        console.log('Days of the week')
                         console.log('Title:', event.title);
                         console.log('Location:', event.location);
                         console.log('Description:', event.description);
