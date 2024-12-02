@@ -305,6 +305,35 @@ async function displayEvents(user_id, day, month, year) {
     }
 } //returns a list of json objects with each json having each of the event fields (title, description, start and end times, etc.)
 
+async function updateEvent(user_id, event_id, updateFields) {
+    try {
+        const userRef = doc(FIREBASE_DB, 'users', user_id);
+        const userSnap = await getDoc(userRef);
+        const calendar_id = userSnap.data().calendar_id;
+        
+        const eventRef = doc(FIREBASE_DB, 'events', event_id);
+        const eventDoc = await getDoc(eventRef);
+        
+        if (eventDoc.exists() && eventDoc.data().calendar_id === calendar_id) {
+            await updateDoc(eventRef, {
+                ...Object.entries(updateFields).reduce((acc, [key, value]) => {
+                    if (value !== undefined) acc[key] = value;
+                    return acc;
+                }, {})
+            });
+            console.log('Event updated successfully');
+            return true;
+        } else {
+            console.error('Event not found or does not belong to user');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error updating event:', error);
+        return false;
+    }
+}
+
+
 async function displayEvents2(user_id, day, month, year) {
     try {
         const userRef = doc(FIREBASE_DB, 'users', user_id);
@@ -360,4 +389,5 @@ async function displayEvents2(user_id, day, month, year) {
         return [];
     }
 }
-export {updateTitle, updateRecurrence, updateTime, updateDescription,updateLocation, findEvent, displayEvents, displayEvents2};
+
+export {updateEvent, updateTitle, updateRecurrence, updateTime, updateDescription,updateLocation, findEvent, displayEvents, displayEvents2};

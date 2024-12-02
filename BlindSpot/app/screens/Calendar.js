@@ -35,28 +35,16 @@ function Calendar() {
     const [selectedDateEvents, setSelectedDateEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [editedEvent, setEditedEvent] = useState(() => ({
+    const [editedEvent, setEditedEvent] = useState({
         title: '',
         category: '',
         startTime: new Date(),
         endTime: new Date(),
         description: '',
-    }));
-    
+    });
     const [monthlyEvents, setMonthlyEvents] = useState({});
     const [currentMonthEvents, setCurrentMonthEvents] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
-
-    const EditableField = React.memo(({ value, onChangeText, placeholder }) => (
-        <TextInput
-            style={styles.editInput}
-            value={value}
-            onChangeText={onChangeText}
-            placeholder={placeholder}
-            multiline
-        />
-    ));
-    
 
     const scrollViewRef = useRef(null);
 
@@ -195,10 +183,10 @@ function Calendar() {
 
     const handleEditEvent = (event) => {
         setEditedEvent({
-            title: event.title,
-            category: event.category,
-            startTime: new Date(event.start_time),
-            endTime: new Date(event.end_time),
+            title: event.title || '',
+            category: event.category || '',
+            startTime: event.start_time ? new Date(event.start_time) : new Date(),
+            endTime: event.end_time ? new Date(event.end_time) : new Date(),
             description: event.description || '',
         });
         setSelectedEvent(event);
@@ -219,14 +207,6 @@ function Calendar() {
         setIsEditing(false);
     };
 
-    const textInputRef = useRef(null);
-
-    useEffect(() => {
-        if (isEditing) {
-            textInputRef.current?.focus();
-        }
-    }, [isEditing]);
-
     const EventCard = React.memo(({ event, isCollapsed }) => {
         const formatEventTime = (start, end) => {
             const startTime = formatTime(start);
@@ -246,51 +226,60 @@ function Calendar() {
     
                     <ScrollView style={styles.expandedContent}>
                         <View style={styles.eventDetails}>
-                            <Text style={styles.eventTime}>{formatEventTime(event.start_time, event.end_time)}</Text>
-                            <Text style={styles.eventDescription}>{event.description || 'No description available'}</Text>
+                            <Text style={styles.eventTime}>
+                                Time: {formatEventTime(event.start_time, event.end_time)}
+                            </Text>
+                            <Text style={styles.eventDescription}>Category: {event.category}</Text>
+                            <Text style={styles.eventDescription}>Description: {event.description || 'No description available'}</Text>
                         </View>
     
                         {isEditing && selectedEvent?.id === event.id ? (
                             <View style={styles.editContainer}>
-                                <Text style={styles.editTitle}>Edit Event</Text>
-                                {/* Use a controlled component for TextInput */}
+                                <Text style={styles.editTitle}>Editing Event</Text>
+                                
                                 <TextInput
                                     style={styles.editInput}
                                     value={editedEvent.title}
-                                    onChangeText={(text) =>
-                                        setEditedEvent((prev) => ({ ...prev, title: text }))
-                                    }
-                                    placeholder="Event title"
+                                    onChangeText={(text) => setEditedEvent(prev => ({ ...prev, title: text }))}
+                                    placeholder={event.title}
                                 />
-                                <DateTimePicker
-                                    value={editedEvent.startTime}
-                                    mode="datetime"
-                                    onChange={(eventChange, date) => {
-                                        if (date) setEditedEvent((prev) => ({ ...prev, startTime: date }));
-                                    }}
-                                />
-                                <DateTimePicker
-                                    value={editedEvent.endTime}
-                                    mode="datetime"
-                                    onChange={(eventChange, date) => {
-                                        if (date) setEditedEvent((prev) => ({ ...prev, endTime: date }));
-                                    }}
-                                />
+                                <View style={{ marginBottom: 15 }}>
+                                    <DateTimePicker
+                                        value={new Date(event.start_time)}
+                                        mode="datetime"
+                                        onChange={(eventChange, date) => {
+                                            if (date) setEditedEvent(prev => ({ ...prev, startTime: date }));
+                                        }}
+                                    />
+                                </View>
+                                
+                                <View style={{ marginBottom: 15 }}>
+                                    <DateTimePicker
+                                        value={new Date(event.end_time)}
+                                        mode="datetime"
+                                        onChange={(eventChange, date) => {
+                                            if (date) setEditedEvent(prev => ({ ...prev, endTime: date }));
+                                        }}
+                                    />
+                                </View>
+                            
                                 <TextInput
                                     style={styles.editInput}
                                     value={editedEvent.category}
-                                    onChangeText={(text) => setEditedEvent((prev) => ({ ...prev, category: text }))}
-                                    placeholder="Event category"
+                                    onChangeText={(text) => setEditedEvent(prev => ({ ...prev, category: text }))}
+                                    placeholder={event.category}
                                 />
+                            
                                 <TextInput
                                     style={[styles.editInput, styles.descriptionInput]}
                                     multiline
                                     value={editedEvent.description}
-                                    onChangeText={(text) => setEditedEvent((prev) => ({ ...prev, description: text }))}
-                                    placeholder="Add event description..."
+                                    onChangeText={(text) => setEditedEvent(prev => ({ ...prev, description: text }))}
+                                    placeholder={event.description || 'Add event description...'}
                                 />
+                            
                                 <View style={styles.editButtonsContainer}>
-                                    <TouchableOpacity
+                                    <TouchableOpacity 
                                         style={[styles.actionButton, styles.saveButton]}
                                         onPress={handleSave}
                                     >
@@ -298,7 +287,7 @@ function Calendar() {
                                             {isSaving ? 'Saving...' : 'Save Changes'}
                                         </Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity
+                                    <TouchableOpacity 
                                         style={[styles.actionButton, styles.cancelButton]}
                                         onPress={handleCancel}
                                     >
@@ -308,13 +297,13 @@ function Calendar() {
                             </View>
                         ) : (
                             <View style={styles.actionButtonsContainer}>
-                                <TouchableOpacity
+                                <TouchableOpacity 
                                     style={[styles.actionButton, styles.editButton]}
                                     onPress={() => handleEditEvent(event)}
                                 >
                                     <Text style={styles.buttonText}>Edit Event</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity
+                                <TouchableOpacity 
                                     style={[styles.actionButton, styles.deleteButton]}
                                     onPress={() => handleDeleteEvent(event.id, event.title)}
                                 >
@@ -344,7 +333,9 @@ function Calendar() {
             >
                 <Text style={styles.eventTitle}>{event.title}</Text>
                 <View style={styles.eventDetails}>
-                    <Text style={styles.eventTime}>{formatEventTime(event.start_time, event.end_time)}, {event.category}</Text>
+                    <Text style={styles.eventTime}>
+                        {formatEventTime(event.start_time, event.end_time)}, {event.category}
+                    </Text>
                     <Text style={styles.eventDescription} numberOfLines={2}>
                         {event.description || 'No description available'}
                     </Text>
@@ -352,7 +343,6 @@ function Calendar() {
             </TouchableOpacity>
         );
     });
-    
 
     return (
         <View style={styles.container}>
