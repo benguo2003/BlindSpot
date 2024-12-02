@@ -8,6 +8,7 @@ import Navbar from '../../components/Navbar';
 import { displayEvents2, updateEvent } from '../backend/updateEvent';
 import { removeEvent } from '../backend/removeEvent';
 import EventModal from '../../components/EventModal';
+import { addEvent } from '../backend/addEvent';
 
 const getLocalDateString = (date) => {
     const year = date.getFullYear();
@@ -111,6 +112,37 @@ function Calendar() {
             console.error('Error updating event:', error);
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleSaveNew = async (editedFields) => {
+        try {
+            const result = await addEvent(userID, {
+                title: editedFields.title,
+                description: editedFields.description,
+                start_time: editedFields.startTime,
+                end_time: editedFields.endTime,
+                category: editedFields.category,
+                change: "create",
+                location: ""
+            }, null);
+            
+            if (result.success) {
+                const currentDate = new Date();
+                const events = await displayEvents2(userID, 1, currentDate.getMonth(), currentDate.getFullYear());
+                const eventsByDate = {};
+                events.forEach(event => {
+                    const date = getLocalDateString(event.start_time);
+                    if (!eventsByDate[date]) eventsByDate[date] = [];
+                    eventsByDate[date].push(event);
+                });
+                setMonthlyEvents(eventsByDate);
+                setIsModalVisible(false);
+                setIsEditing(false);
+                setSelectedEvent(null);
+            }
+        } catch (error) {
+            console.error('Error adding event:', error);
         }
     };
 
@@ -218,10 +250,23 @@ function Calendar() {
                             </Text>
                         )}
                     </ScrollView>
+                    {selected && (
+                        <TouchableOpacity 
+                            style={styles.addButton}
+                            onPress={() => {
+                                setSelectedEvent(null);
+                                setIsModalVisible(true);
+                                setIsEditing(true);
+                            }}
+                        >
+                            <Text style={styles.addButtonText}>+</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
 
             <EventModal
+                selected={selected}
                 visible={isModalVisible}
                 event={selectedEvent}
                 onClose={() => {
@@ -230,7 +275,7 @@ function Calendar() {
                     setIsEditing(false);
                 }}
                 onDelete={handleDeleteEvent}
-                onSave={handleSave}
+                onSave={selectedEvent ? handleSave : handleSaveNew}
                 isEditing={isEditing}
                 setIsEditing={setIsEditing}
                 isSaving={isSaving}
@@ -331,7 +376,28 @@ const styles = StyleSheet.create({
         color: '#666',
         fontSize: 16,
         marginTop: 20,
-    }
+    },
+    addButton: {
+        position: 'absolute',
+        right: 15,
+        bottom: 15,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: 'purple',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    addButtonText: {
+        color: 'white',
+        fontSize: 30,
+        fontWeight: 'bold',
+    },
 });
 
 export default Calendar;

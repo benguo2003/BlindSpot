@@ -1,10 +1,11 @@
 import React, { useContext, useState } from 'react';
 import AppContext from '../../contexts/appContext';
 import { useNavigation } from '@react-navigation/native';
-import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity, Animated, TextInput } from 'react-native';
+import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity, Animated, TextInput, ActivityIndicator } from 'react-native';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
 import Confetti from 'react-native-confetti';
+import { askGPT } from '../backend/final_gpt'
 
 const mockQuestions = [
     {
@@ -29,28 +30,75 @@ const mockQuestions = [
         question: "How long does it take you to take out the trash?",
         type: "time"
     },
+    // {
+    //     id: "Dishes",
+    //     question: "When did you do the dishes?",
+    //     type: "choice",
+    //     options: ["On time!", "A different time", "I didn't do it"]
+    // },
+    // {
+    //     id: "Dishes2",
+    //     question: "How long does it take you to do the dishes?",
+    //     type: "time"
+    // },
+    // {
+    //     id: "Meditation",
+    //     question: "When did you meditate?",
+    //     type: "choice",
+    //     options: ["On time!", "A different time", "I didn't do it"]
+    // },
+    // {
+    //     id: "Meditation2",
+    //     question: "How long did you meditate?",
+    //     type: "time"
+    // },
+    // {
+    //     id: "Groceries",
+    //     question: "When did you go grocery shopping?",
+    //     type: "choice",
+    //     options: ["On time!", "A different time", "I didn't do it"]
+    // },
+    // {
+    //     id: "Groceries2",
+    //     question: "How long did you spend grocery shopping?",
+    //     type: "time"
+    // },
+    // {
+    //     id: "Exercise",
+    //     question: "When did you exercise?",
+    //     type: "choice",
+    //     options: ["On time!", "A different time", "I didn't do it"]
+    // },
+    // {
+    //     id: "Exercise2",
+    //     question: "How long did you exercise?",
+    //     type: "time"
+    // },
     {
-        id: "Dishes",
-        question: "When did you do the dishes?",
+        id: "Fold Clothes",
+        question: "When did you fold your clothes?",
         type: "choice",
         options: ["On time!", "A different time", "I didn't do it"]
-    },
+    }, 
     {
-        id: "Dishes2",
-        question: "How long does it take you to do the dishes?",
+        id: "Fold Clothes2",
+        question: "How long does it take you to fold your clothes?",
         type: "time"
-    }
+
+    },
+
 ];
 
 function Surveys() {
     const navigation = useNavigation();
-    const { theme } = useContext(AppContext);
+    const { theme, userID } = useContext(AppContext);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [answers, setAnswers] = useState({});
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [timeInput, setTimeInput] = useState('');
     const confettiRef = React.useRef();
     const [showCompletion, setShowCompletion] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     
     const cardPositions = mockQuestions.map((_, index) => 
         React.useRef(new Animated.Value(index === 0 ? 0 : Dimensions.get('window').width)).current
@@ -69,6 +117,24 @@ function Surveys() {
             return timeInput !== '' && !isNaN(timeInput) && parseInt(timeInput) > 0;
         }
         return selectedAnswer !== null;
+    };
+    
+    const callGPT = async () => {
+        setIsLoading(true);
+        try {
+            const now = new Date();
+            const day = now.getDate();       
+            const month = now.getMonth(); 
+            const year = now.getFullYear();
+            
+            await askGPT(userID, 1, ["Laundry", "Fold Clothes", "Trash"], day, month, year);
+            navigation.navigate('Home');
+        } catch (error) {
+            console.error('Error calling GPT:', error);
+            // Optionally add error handling UI here
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleNext = () => {
@@ -287,12 +353,19 @@ function Surveys() {
                         <View style={styles.completionCard}>
                             <Text style={styles.completionText}>Survey Complete!</Text>
                             <Text style={styles.completionSubtext}>Thank you for your responses</Text>
-                            <TouchableOpacity 
-                                style={styles.doneButton}
-                                onPress={() => navigation.navigate('Home')}
-                            >
-                                <Text style={styles.doneButtonText}>Done</Text>
-                            </TouchableOpacity>
+                            {isLoading ? (
+                                <View style={styles.loadingContainer}>
+                                    <ActivityIndicator size="large" color="#9B7FA7" />
+                                    <Text style={styles.loadingText}>Processing your responses...</Text>
+                                </View>
+                            ) : (
+                                <TouchableOpacity 
+                                    style={styles.doneButton}
+                                    onPress={() => callGPT()}
+                                >
+                                    <Text style={styles.doneButtonText}>Find my BlindSpots!</Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
                         <Confetti ref={confettiRef} count={50} />
                     </>
@@ -490,6 +563,16 @@ const styles = StyleSheet.create({
     minutesLabel: {
         fontSize: 16,
         color: '#333',
+    },
+    loadingContainer: {
+        marginTop: 30,
+        alignItems: 'center',
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
     },
 });
 

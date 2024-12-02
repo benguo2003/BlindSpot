@@ -12,8 +12,8 @@ async function addEvent(user_id, single_time_event, recurring_event) {
                 title: single_time_event.title,
                 description: single_time_event.description,
                 location: single_time_event.location,
-                start_time: single_time_event.start_time,
-                end_time: single_time_event.end_time,
+                start_time: new Date (single_time_event.start_time),
+                end_time: new Date (single_time_event.end_time),
                 change: single_time_event.change,
                 category: single_time_event.category,
                 
@@ -60,4 +60,3 @@ async function addEvent(user_id, single_time_event, recurring_event) {
 }
 
 export { addEvent };
-

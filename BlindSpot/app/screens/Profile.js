@@ -5,14 +5,40 @@ import { Phone, Smile, LogOut, Trash2 } from 'lucide-react-native';
 import AppContext from '../../contexts/appContext';
 import Navbar from '../../components/Navbar';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
+import { retrieveInfo } from '../backend/updateProfile';
+
 
 import { FIREBASE_AUTH } from '../backend/FirebaseConfig';
 
 function Profile({ navigation }) {
-    const { theme } = useContext(AppContext);
+    const { theme, userID } = useContext(AppContext);
     const [profileImage, setProfileImage] = useState(null);
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
+    const [userInfo, setUserInfo] = useState({
+        name: '',
+        email: '',
+        age: '',
+    });
+
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            try {
+                const info = await retrieveInfo(userID);
+                if (info) {
+                    setUserInfo({
+                        name: info.name || '',
+                        email: info.email || '',
+                        age: info.age || '',
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        };
+    
+        fetchUserInfo();
+    }, [userID]);
 
     useEffect(() => {
         const handleResize = () => {
@@ -156,8 +182,9 @@ function Profile({ navigation }) {
                         <Text style={styles.changePhotoText}>Change Profile Picture</Text>
                     </TouchableOpacity>
                     
-                    <Text style={[styles.userName, { fontFamily: theme.fonts.regular }]}>Your Name</Text>
-                    <Text style={styles.userEmail}>testAcc@gmail.com</Text>
+                    <Text style={[styles.userName, { fontFamily: theme.fonts.regular }]}>{userInfo.name}</Text>
+                    <Text style={styles.userEmail}>{userInfo.email}</Text>
+
                 </View>
 
                 <View style={styles.infoSection}>
@@ -177,7 +204,7 @@ function Profile({ navigation }) {
                         </View>
                         <View style={styles.textContainer}>
                             <Text style={styles.infoLabel}>Age</Text>
-                            <Text style={styles.infoValue}>21</Text>
+                            <Text style={styles.infoValue}>{userInfo.age}</Text>
                         </View>
                     </TouchableOpacity>
 

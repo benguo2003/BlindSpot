@@ -25,8 +25,13 @@ export default function SignUp({ navigation }) {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const { userID, setUserID } = useContext(AppContext);
+    const [name, setName] = useState('');
 
     const handleSignUp = async () => {
+        if (!name.trim()) {
+            Alert.alert('Invalid Name', 'Please enter your name.');
+            return;
+        }
         if (!validateEmail(email)) {
             Alert.alert('Invalid Email', 'Please enter a valid email address.');
             return;
@@ -44,7 +49,7 @@ export default function SignUp({ navigation }) {
         try {
             let user_id = email;
             await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
-            await addUserToUsersCollection(user_id, email, 'testUser', 30);
+            await addUserToUsersCollection(user_id, email, name, 30); // Changed 'testUser' to name
             
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('FirstSurvey');
@@ -55,6 +60,7 @@ export default function SignUp({ navigation }) {
             Alert.alert('Error', `An error occurred while processing your request: ${error.message}`);
         } finally {
             setIsLoading(false);
+            setName('');
             setEmail('');
             setPassword('');
             setConfirmPassword('');
@@ -78,6 +84,14 @@ export default function SignUp({ navigation }) {
             ) : (
                 <>
                     <Text style={styles.title}>Sign Up</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Name"
+                        value={name}
+                        onChangeText={setName}
+                        autoCorrect={false}
+                        editable={!isLoading}
+                    />
                     <TextInput
                         style={styles.input}
                         placeholder="Email"

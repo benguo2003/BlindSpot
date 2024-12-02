@@ -20,7 +20,8 @@ const EventModal = ({
     onSave, 
     isEditing, 
     setIsEditing,
-    isSaving 
+    isSaving,
+    selected
 }) => {
     const [editedFields, setEditedFields] = useState({
         title: '',
@@ -29,6 +30,11 @@ const EventModal = ({
         endTime: new Date(),
         description: '',
     });
+
+    const defaultDate = selected ? new Date(selected) : new Date();
+    defaultDate.setHours(9, 0, 0, 0);
+    const defaultEndDate = new Date(defaultDate);
+    defaultEndDate.setHours(10, 0, 0, 0);
 
     useEffect(() => {
         if (event) {
@@ -39,8 +45,21 @@ const EventModal = ({
                 endTime: new Date(event.end_time),
                 description: event.description || '',
             });
+        } else if (selected) {
+            // Reset fields when modal becomes visible and there's no event
+            const [year, month, day] = selected.split('-');
+            const defaultDate = new Date(year, month - 1, day, 9, 0, 0);
+            const defaultEndDate = new Date(year, month - 1, day, 10, 0, 0);
+            
+            setEditedFields({
+                title: '',
+                category: '',
+                startTime: defaultDate,
+                endTime: defaultEndDate,
+                description: '',
+            });
         }
-    }, [event]);
+    }, [event, selected, visible]);
 
     const formatTime = (date) => {
         if (!date) return '';
@@ -81,7 +100,7 @@ const EventModal = ({
                 <View style={styles.modalView}>
                     <View style={styles.modalHeader}>
                         <Text style={styles.modalTitle}>
-                            {event?.title} | {formatDisplayDate(event?.start_time)}
+                            {event ? `${event.title} | ${formatDisplayDate(event.start_time)}` : 'Create Event'}
                         </Text>
                         <TouchableOpacity onPress={onClose}>
                             <Text style={styles.closeButton}>✕</Text>
