@@ -39,7 +39,41 @@ const mockQuestions = [
         id: "Dishes2",
         question: "How long does it take you to do the dishes?",
         type: "time"
-    }
+    },
+    {
+        id: "Meditation",
+        question: "When did you meditate?",
+        type: "choice",
+        options: ["On time!", "A different time", "I didn't do it"]
+    },
+    {
+        id: "Meditation2",
+        question: "How long did you meditate?",
+        type: "time"
+    },
+    {
+        id: "Groceries",
+        question: "When did you go grocery shopping?",
+        type: "choice",
+        options: ["On time!", "A different time", "I didn't do it"]
+    },
+    {
+        id: "Groceries2",
+        question: "How long did you spend grocery shopping?",
+        type: "time"
+    },
+    {
+        id: "Exercise",
+        question: "When did you exercise?",
+        type: "choice",
+        options: ["On time!", "A different time", "I didn't do it"]
+    },
+    {
+        id: "Exercise2",
+        question: "How long did you exercise?",
+        type: "time"
+    },
+
 ];
 
 function Surveys() {
