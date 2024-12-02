@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, useRef} from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import AppContext from '../../contexts/appContext';
 import { useNavigation } from '@react-navigation/native';
 import { 
@@ -9,73 +9,44 @@ import {
     Image, 
     TouchableOpacity, 
     ScrollView,
-    Animated,
     TextInput
 } from 'react-native';
-import {Calendar as RNCalendar} from 'react-native-calendars';
+import { Calendar as RNCalendar } from 'react-native-calendars';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
+import { displayEvents2, updateEvent } from '../backend/updateEvent';
+import { removeEvent } from '../backend/removeEvent';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-// Mock events data
-const mockEvents = {
-    '2024-12-05': [
-        {
-            id: 1,
-            title: 'Team Meeting',
-            time: '10:00 AM',
-            duration: '1 hour',
-            location: 'Conference Room A',
-            description: 'Weekly sync with the development team'
-        },
-        {
-            id: 2,
-            title: 'Lunch with Client',
-            time: '12:30 PM',
-            duration: '1.5 hours',
-            location: 'Downtown Cafe',
-            description: 'Project discussion over lunch'
-        }
-    ],
-    '2024-12-10': [
-        {
-            id: 3,
-            title: 'Product Launch',
-            time: '2:00 PM',
-            duration: '2 hours',
-            location: 'Main Auditorium',
-            description: 'New feature release presentation'
-        }
-    ],
-    '2024-12-15': [
-        {
-            id: 4,
-            title: 'Training Session',
-            time: '9:00 AM',
-            duration: '3 hours',
-            location: 'Training Room B',
-            description: 'New employee onboarding'
-        },
-        {
-            id: 5,
-            title: 'Project Deadline',
-            time: '5:00 PM',
-            duration: 'N/A',
-            location: 'Online',
-            description: 'Submit final project deliverables'
-        }
-    ]
+// Helper function
+const getLocalDateString = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 };
 
 function Calendar() {
     const navigation = useNavigation();
-    const { userType, theme } = useContext(AppContext);
+    const { userType, theme, userID } = useContext(AppContext);
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
     const [selected, setSelected] = useState('');
     const [selectedDateEvents, setSelectedDateEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [editedDescription, setEditedDescription] = useState('');
+    const [editedEvent, setEditedEvent] = useState({
+        title: '',
+        category: '',
+        startTime: new Date(),
+        endTime: new Date(),
+        description: '',
+    });
+    const [monthlyEvents, setMonthlyEvents] = useState({});
+    const [currentMonthEvents, setCurrentMonthEvents] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const scrollViewRef = useRef(null);
 
     useEffect(() => {
         const handleResize = () => {
@@ -88,41 +59,161 @@ function Calendar() {
 
     useEffect(() => {
         if (selected) {
-            setSelectedDateEvents(mockEvents[selected] || []);
+            const selectedDateEvents = monthlyEvents[selected] || [];
+            setSelectedDateEvents(selectedDateEvents);
         }
-    }, [selected]);
+    }, [selected, monthlyEvents]);
 
-    const handleDeleteEvent = (eventId) => {
-        const updatedEvents = selectedDateEvents.filter(event => event.id !== eventId);
-        setSelectedDateEvents(updatedEvents);
-        setSelectedEvent(null);
+    useEffect(() => {
+        const fetchMonthlyEvents = async () => {
+            const currentDate = new Date();
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            try {
+                const events = await displayEvents2(userID, 1, month, year);
+                
+                // Organize events by date
+                const eventsByDate = {};
+                events.forEach(event => {
+                    const date = getLocalDateString(event.start_time);  // Use our new helper function
+                    if (!eventsByDate[date]) {
+                        eventsByDate[date] = [];
+                    }
+                    eventsByDate[date].push(event);
+                });
+                
+                console.log('Events by date:', eventsByDate); // Add this to debug
+                setMonthlyEvents(eventsByDate);
+                setCurrentMonthEvents(events);
+            } catch (error) {
+                console.error('Error fetching monthly events:', error);
+            }
+        };
+    
+        fetchMonthlyEvents();
+    }, [userID]);
+
+    const handleDeleteEvent = async (eventId, eventTitle) => {
+        try {
+            const result = await removeEvent(userID, eventTitle);
+            
+            if (result.success) {
+                // Update local state only if deletion was successful
+                const updatedEvents = selectedDateEvents.filter(event => event.id !== eventId);
+                setSelectedDateEvents(updatedEvents);
+                setSelectedEvent(null);
+    
+                // Refresh the monthly events to update the dots
+                const currentDate = new Date();
+                const events = await displayEvents2(userID, 1, currentDate.getMonth(), currentDate.getFullYear());
+                
+                const eventsByDate = {};
+                events.forEach(event => {
+                    const date = getLocalDateString(event.start_time);
+                    if (!eventsByDate[date]) {
+                        eventsByDate[date] = [];
+                    }
+                    eventsByDate[date].push(event);
+                });
+                
+                setMonthlyEvents(eventsByDate);
+                setCurrentMonthEvents(events);
+            } else {
+                console.error('Failed to delete event:', result.message);
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+        }
     };
 
-    const handleSaveChanges = (eventId) => {
-        // Create the updated event
-        const updatedEvent = {
-            ...selectedEvent,
-            description: editedDescription
+    const formatTime = (date) => {
+        if (!date) return '';
+        const options = { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'America/Los_Angeles' // This will ensure consistent PST/PDT display
         };
-        
-        // Update the event in selectedDateEvents
-        const updatedEvents = selectedDateEvents.map(event => {
-            if (event.id === eventId) {
-                return updatedEvent;
+        return date.toLocaleTimeString([], options);
+    };
+
+    const formatDisplayDate = (dateString) => {
+        if (!dateString) return '';
+        // Split the date string and reconstruct it to preserve local timezone
+        const [year, month, day] = dateString.split('-');
+        return new Date(year, month - 1, day).toLocaleDateString();
+    };
+
+    const handleSave = async () => {
+        if (!selectedEvent) return;
+
+        setIsSaving(true);
+        try {
+            const success = await updateEvent(userID, selectedEvent.id, {
+                title: editedEvent.title,
+                start_time: editedEvent.startTime,
+                end_time: editedEvent.endTime,
+                category: editedEvent.category,
+                description: editedEvent.description,
+            });
+    
+            if (success) {
+                // Refresh events
+                const currentDate = new Date();
+                const events = await displayEvents2(userID, 1, currentDate.getMonth(), currentDate.getFullYear());
+                const eventsByDate = {};
+                events.forEach(event => {
+                    const date = getLocalDateString(event.start_time);
+                    if (!eventsByDate[date]) eventsByDate[date] = [];
+                    eventsByDate[date].push(event);
+                });
+                
+                setMonthlyEvents(eventsByDate);
+                setCurrentMonthEvents(events);
+                setIsEditing(false);
+                setSelectedEvent(null);
             }
-            return event;
+        } catch (error) {
+            console.error('Error updating event:', error);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleEditEvent = (event) => {
+        setEditedEvent({
+            title: event.title || '',
+            category: event.category || '',
+            startTime: event.start_time ? new Date(event.start_time) : new Date(),
+            endTime: event.end_time ? new Date(event.end_time) : new Date(),
+            description: event.description || '',
         });
+        setSelectedEvent(event);
+        setIsEditing(true);
+    };
+
+    const handleCancel = () => {
+        if (!selectedEvent) return;
         
-        // Update the mock events data
-        mockEvents[selected] = updatedEvents;
-        
-        // Update all the state
-        setSelectedDateEvents(updatedEvents);
-        setSelectedEvent(updatedEvent); // Add this line to update the expanded view
+        // Reset all edited values to original event values
+        setEditedEvent({
+            title: selectedEvent.title,
+            category: selectedEvent.category,
+            startTime: new Date(selectedEvent.start_time),
+            endTime: new Date(selectedEvent.end_time),
+            description: selectedEvent.description || '',
+        });
         setIsEditing(false);
     };
 
-    const EventCard = ({ event, isCollapsed }) => {
+    const EventCard = React.memo(({ event, isCollapsed }) => {
+        const formatEventTime = (start, end) => {
+            const startTime = formatTime(start);
+            const endTime = formatTime(end);
+            return `${startTime} - ${endTime}`;
+        };
+    
         if (!isCollapsed) {
             return (
                 <View style={styles.expandedEventCard}>
@@ -132,88 +223,131 @@ function Calendar() {
                             <Text style={styles.closeButtonText}>✕</Text>
                         </TouchableOpacity>
                     </View>
-
+    
                     <ScrollView style={styles.expandedContent}>
                         <View style={styles.eventDetails}>
-                            <Text style={styles.eventTime}>🕒 {event.time} ({event.duration})</Text>
-                            <Text style={styles.eventLocation}>📍 {event.location}</Text>
-                            <Text style={styles.eventDescription}>{event.description}</Text>
+                            <Text style={styles.eventTime}>
+                                Time: {formatEventTime(event.start_time, event.end_time)}
+                            </Text>
+                            <Text style={styles.eventDescription}>Category: {event.category}</Text>
+                            <Text style={styles.eventDescription}>Description: {event.description || 'No description available'}</Text>
                         </View>
-
-                    {isEditing ? (
-                        <View style={styles.editContainer}>
-                            <Text style={styles.editTitle}>Edit Event</Text>
-                            {/* Add TextInput for description */}
-                            <TextInput
-                                style={styles.editInput}
-                                multiline
-                                value={editedDescription}
-                                onChangeText={setEditedDescription}
-                                placeholder="Event description"
-                            />
-                            <View style={styles.editButtonsContainer}>
+    
+                        {isEditing && selectedEvent?.id === event.id ? (
+                            <View style={styles.editContainer}>
+                                <Text style={styles.editTitle}>Editing Event</Text>
+                                
+                                <TextInput
+                                    style={styles.editInput}
+                                    value={editedEvent.title}
+                                    onChangeText={(text) => setEditedEvent(prev => ({ ...prev, title: text }))}
+                                    placeholder={event.title}
+                                />
+                                <View style={{ marginBottom: 15 }}>
+                                    <DateTimePicker
+                                        value={new Date(event.start_time)}
+                                        mode="datetime"
+                                        onChange={(eventChange, date) => {
+                                            if (date) setEditedEvent(prev => ({ ...prev, startTime: date }));
+                                        }}
+                                    />
+                                </View>
+                                
+                                <View style={{ marginBottom: 15 }}>
+                                    <DateTimePicker
+                                        value={new Date(event.end_time)}
+                                        mode="datetime"
+                                        onChange={(eventChange, date) => {
+                                            if (date) setEditedEvent(prev => ({ ...prev, endTime: date }));
+                                        }}
+                                    />
+                                </View>
+                            
+                                <TextInput
+                                    style={styles.editInput}
+                                    value={editedEvent.category}
+                                    onChangeText={(text) => setEditedEvent(prev => ({ ...prev, category: text }))}
+                                    placeholder={event.category}
+                                />
+                            
+                                <TextInput
+                                    style={[styles.editInput, styles.descriptionInput]}
+                                    multiline
+                                    value={editedEvent.description}
+                                    onChangeText={(text) => setEditedEvent(prev => ({ ...prev, description: text }))}
+                                    placeholder={event.description || 'Add event description...'}
+                                />
+                            
+                                <View style={styles.editButtonsContainer}>
+                                    <TouchableOpacity 
+                                        style={[styles.actionButton, styles.saveButton]}
+                                        onPress={handleSave}
+                                    >
+                                        <Text style={styles.buttonText}>
+                                            {isSaving ? 'Saving...' : 'Save Changes'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity 
+                                        style={[styles.actionButton, styles.cancelButton]}
+                                        onPress={handleCancel}
+                                    >
+                                        <Text style={styles.buttonText}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ) : (
+                            <View style={styles.actionButtonsContainer}>
                                 <TouchableOpacity 
-                                    style={[styles.actionButton, styles.saveButton]}
-                                    onPress={() => handleSaveChanges(event.id)}
+                                    style={[styles.actionButton, styles.editButton]}
+                                    onPress={() => handleEditEvent(event)}
                                 >
-                                    <Text style={styles.buttonText}>Save Changes</Text>
+                                    <Text style={styles.buttonText}>Edit Event</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity 
-                                    style={[styles.actionButton, styles.cancelButton]}
-                                    onPress={() => {
-                                        setIsEditing(false);
-                                        setEditedDescription(event.description); // Reset to original
-                                    }}
+                                    style={[styles.actionButton, styles.deleteButton]}
+                                    onPress={() => handleDeleteEvent(event.id, event.title)}
                                 >
-                                    <Text style={styles.buttonText}>Cancel</Text>
+                                    <Text style={styles.buttonText}>Delete Event</Text>
                                 </TouchableOpacity>
                             </View>
-                        </View>
-                    ) : (
-                        <View style={styles.actionButtonsContainer}>
-                            <TouchableOpacity 
-                                style={[styles.actionButton, styles.editButton]}
-                                onPress={() => {
-                                    setEditedDescription(event.description); // Set initial value
-                                    setIsEditing(true);
-                                }}
-                            >
-                                <Text style={styles.buttonText}>Edit Event</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity 
-                                style={[styles.actionButton, styles.deleteButton]}
-                                onPress={() => handleDeleteEvent(event.id)}
-                            >
-                                <Text style={styles.buttonText}>Delete Event</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                        )}
                     </ScrollView>
                 </View>
             );
         }
-
+    
         return (
             <TouchableOpacity 
                 style={styles.eventCard}
                 onPress={() => {
                     setSelectedEvent(event);
+                    setEditedEvent({
+                        title: event.title,
+                        category: event.category,
+                        startTime: new Date(event.start_time),
+                        endTime: new Date(event.end_time),
+                        description: event.description || '',
+                    });
+                    setIsEditing(false);
                 }}
             >
                 <Text style={styles.eventTitle}>{event.title}</Text>
                 <View style={styles.eventDetails}>
-                    <Text style={styles.eventTime}>🕒 {event.time} ({event.duration})</Text>
-                    <Text style={styles.eventLocation}>📍 {event.location}</Text>
-                    <Text style={styles.eventDescription}>{event.description}</Text>
+                    <Text style={styles.eventTime}>
+                        {formatEventTime(event.start_time, event.end_time)}, {event.category}
+                    </Text>
+                    <Text style={styles.eventDescription} numberOfLines={2}>
+                        {event.description || 'No description available'}
+                    </Text>
                 </View>
             </TouchableOpacity>
         );
-    };
+    });
 
     return (
         <View style={styles.container}>
             <View style={styles.headerBox}>
-                <Text style={[styles.headerText, {fontFamily: theme.fonts.bold}]}>Calendar</Text>
+                <Text style={[styles.headerText, { fontFamily: theme.fonts.bold }]}>Calendar</Text>
                 <TouchableOpacity 
                     style={styles.LogoContainer}
                     onPress={() => navigation.navigate('SignIn')}
@@ -261,10 +395,10 @@ function Calendar() {
                         }}
                         onDayPress={day => {
                             setSelected(day.dateString);
-                            setSelectedEvent(null);
+                            if (selectedEvent) setSelectedEvent(null);
                         }}
                         markedDates={{
-                            ...Object.keys(mockEvents).reduce((acc, date) => ({
+                            ...Object.keys(monthlyEvents).reduce((acc, date) => ({
                                 ...acc,
                                 [date]: {
                                     marked: true,
@@ -275,14 +409,14 @@ function Calendar() {
                                 selected: true,
                                 disableTouchEvent: true,
                                 selectedDotColor: 'white',
-                                marked: mockEvents[selected] ? true : false
+                                marked: monthlyEvents[selected]?.length > 0
                             }
                         }}
                     />
                     
                     <View style={styles.eventsContainer}>
                         <Text style={styles.eventsTitle}>
-                            {selected ? `Events for ${new Date(selected).toLocaleDateString()}` : 'Select a date to view events'}
+                            {selected ? `Events for ${formatDisplayDate(selected)}` : 'Select a date to view events'}
                         </Text>
                         <ScrollView style={styles.eventsList}>
                             {selectedDateEvents.length > 0 ? (
@@ -417,9 +551,10 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     eventDescription: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#444',
         marginTop: 5,
+        lineHeight: 16,
     },
     noEventsText: {
         textAlign: 'center',
@@ -492,22 +627,36 @@ const styles = StyleSheet.create({
     },
     editButtonsContainer: {
         flexDirection: 'row',
-        justifyContent: 'center', // Changed from space-around to center
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 30,
-        gap: 20, // Add gap between buttons
+        marginTop: 20,
+        gap: 15,
     },
     editInput: {
         backgroundColor: 'white',
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 8,
-        padding: 15,
-        marginBottom: 20,
+        padding: 12,
+        marginBottom: 15,
         minHeight: 100,
         textAlignVertical: 'top',
-        fontSize: 16,
+        fontSize: 14,
     },
+    descriptionInput: {
+        minHeight: 100,
+        textAlignVertical: 'top',
+    },
+    datePickerContainer: {
+        marginBottom: 15,
+    },
+    fieldLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'purple',
+        marginTop: 10,
+        marginBottom: 5,
+    }
 });
 
 export default Calendar;
