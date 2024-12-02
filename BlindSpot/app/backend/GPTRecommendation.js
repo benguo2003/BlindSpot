@@ -1,6 +1,6 @@
 import {FIREBASE_DB, chatGPTRequest} from './FirebaseConfig';
 import {addEvent} from './addEvent';
-import {updateTime} from './updateEvent';
+import {updateTime, displayEvents} from './updateEvent';
 
 
 /* 
@@ -41,34 +41,7 @@ function getTaskHistory(user_id, micro_tasks){
     return events;
   }
   
-function getEvents(user_id){
-
-    // try{
-    //     const userRef = doc(FIREBASE_DB, 'users', user_id);
-    //     const userSnap = await getDoc(userRef);
-    //     const calendar_id = userSnap.data().calendar_id;
-
-    //     const events_query = query(
-    //         collection(FIREBASE_DB, 'events'),
-    //         where('calendar_id', '==', calendar_id),
-    //     );
-    //     const querySnapshot = await getDocs(events_query);
-    //     querySnapshot.forEach(async (eventDoc) =>{
-            
-    //     });
-    //     return {
-    //         success: true,
-    //         message: `Events parsed successfully.`,
-    //     };
-    // } catch(error){
-    //     console.log("Error getting events: ", error);
-    //     return {
-    //         success: false,
-    //         message: "An error occurred while getting the event",
-    //     };
-    // }
-
-    // TODO: Sraavya
+function getSampleEvents(){
 
     var sample_events = [
         { 
@@ -115,7 +88,7 @@ function getStartEndTime(user_id){
         2 is for task suggestion with some history (this is where we use getTaskHistory() func for better recommendations)
     (3) microTasks: This is a string array of all the microtasks we want to add for a given day.
 */
-async function askGPT(user_id, questionType, microTasks) {
+async function askGPT(user_id, questionType, microTasks, day, month, year) {
 
     async function parseResponse(user_id, response, event_names){
 
@@ -168,12 +141,12 @@ Details of Day:
     eventInstructions += `Day Begins: ${times[0]} \nDay Ends: ${times[1]}\n`;
     eventInstructions += `Here are the existing events:\n`;
 
-    var events = getEvents(user_id);
+    var events = displayEvents(user_id, day, month, year);
     var event_names = [];
     for (let i = 0; i < events.length; i++) {
         eventInstructions += JSON.stringify(events[i], null, 0);
         eventInstructions += '\n'
-        event_names.append(events[i].task_name);
+        event_names.append(events[i].title);
     }
 
     switch (questionType) {
@@ -252,13 +225,13 @@ Details of Day:
     eventInstructions += `Day Begins: ${times[0]} \nDay Ends: ${times[1]}\n`;
     eventInstructions += `Here are the existing events:\n`;
 
-    var events = getEvents(user_id);
+    var events = displayEvents(user_id, day, month, year);
     var event_names = [];
     var microtask_events = [];
     for (let i = 0; i < events.length; i++) {
         eventInstructions += JSON.stringify(events[i], null, 0);
         eventInstructions += '\n'
-        event_names.append(events[i].task_name);
+        event_names.append(events[i].title);
         // TODO: If a task is a microtask, append its name to the microtasks array
     }
 
