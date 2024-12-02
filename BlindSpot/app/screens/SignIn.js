@@ -8,7 +8,7 @@ import logo from '../../assets/images/blindSpotTextLogoTransparent.png';
 import AppContext from '../../contexts/appContext';
 import Icon from 'react-native-vector-icons/Feather';
 import theme from '../style/themes.js';
-import {calendar2firebase} from '../backend/calendar2firebase.js'
+
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -48,6 +48,7 @@ export default function SignIn({ navigation }) {
             // Set user context
             setUserEmail(user.email);
             setUserID(user.email);
+
 
             // Navigate to home screen
             navigation.navigate('Home');
