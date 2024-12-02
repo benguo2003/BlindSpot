@@ -49,7 +49,7 @@ export default function SignUp({ navigation }) {
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('FirstSurvey');
             setUserID(user_id);
-            //calendar2firebase(user_id);
+            calendar2firebase(user_id);
         } catch (error) {
             console.error('Error creating account:', error);
             Alert.alert('Error', `An error occurred while processing your request: ${error.message}`);

@@ -93,34 +93,35 @@ async function updateTime(user_id, event_title, start_time, end_time){
     
 }
 //all string parameters
-async function updateDescription(user_id, event_title, new_description)
-{
-    try{
-        //get the user calendar id
+async function updateDescription(user_id, event_id, new_description) {
+    try {
+        // Get the user calendar id
         const userRef = doc(FIREBASE_DB, 'users', user_id);
         const userSnap = await getDoc(userRef);
         const calendar_id = userSnap.data().calendar_id;
-        //search the events collection for the desired event to update
-        const eventQuery = query(
-            collection(FIREBASE_DB, 'events'),
-            where('calendar_id', '==', calendar_id),
-            where('title', '==', event_title)
-        );
-        // make the update
-        const queryResult = await getDocs(eventQuery);
-        queryResult.forEach(async (eventDoc) =>{
-            const eventRef = doc(FIREBASE_DB, 'events', eventDoc.id)
-            await updateDoc(eventRef,{
+
+        // Reference the specific event document by event_id
+        const eventRef = doc(FIREBASE_DB, 'events', event_id);
+
+        // Get the event document
+        const eventDoc = await getDoc(eventRef);
+
+        // Check if the event belongs to the user's calendar
+        if (eventDoc.exists() && eventDoc.data().calendar_id === calendar_id) {
+            // Update the event description
+            await updateDoc(eventRef, {
                 description: new_description,
             });
-        });
-        console.log(`Event description updated.`);
-        return true;    
-        } catch(error){
+            console.log(`Event description updated.`);
+            return true;
+        } else {
+            console.error('Event not found or does not belong to the user.');
+            return false;
+        }
+    } catch (error) {
         console.error('Error updating description: ', error);
         return false;
-        }
-    
+    }
 } 
 
 //event title and new location 
@@ -197,48 +198,62 @@ async function findEvent(user_id, event_title){
 //start and end times formatted like for example: "start_time": "3/31/2025, 2:00:00 PM"
 
 //day, month, year all numbers (ex: displayEvents(user_id, 22, 11, 2025) means events for november 22, 2025)
-async function displayEvents(user_id, day, month, year){
-    try{
-        //get the user calendar id
+async function displayEvents(user_id, day, month, year) {
+    try {
         const userRef = doc(FIREBASE_DB, 'users', user_id);
         const userSnap = await getDoc(userRef);
+        
+        if (!userSnap.exists()) {
+            console.log('No user found');
+            return [];
+        }
+        
         const calendar_id = userSnap.data().calendar_id;
-        //search the events collection for the desired event to update
+
         const eventQuery = query(
             collection(FIREBASE_DB, 'events'),
             where('calendar_id', '==', calendar_id)
         );
+        
         const queryResult = await getDocs(eventQuery);
         const events = [];
-        queryResult.forEach(async (doc) =>{
+
+        queryResult.forEach(doc => {
             const data = doc.data();
-            const start_time = data.start_time;
-            const date_start = start_time.toDate();
-            const end_time = data.end_time;
-            const date_end = end_time.toDate();
-            if(date_start.getFullYear() == year && date_start.getMonth() + 1 === month && date_start.getDate() === day)
-            {
+            
+            // Safely convert Firebase Timestamp to Date
+            const date_start = data.start_time?.toDate();
+            const date_end = data.end_time?.toDate();
+            
+            if (!date_start || !date_end) {
+                console.log('Skipping event with invalid dates:', doc.id);
+                return;
+            }
+
+            if (date_start.getFullYear() == year && 
+                date_start.getMonth() === month && 
+                date_start.getDate() === day) {
+                
                 events.push({
                     id: doc.id,
-                    title: data.title,
-                    description: data.description,
-                    location: data.location,
-                    start_time: date_start.toLocaleString(),
-                    end_time: date_end.toLocaleString(),
-                    recurring: data.recurring,
-                    recurrence_type: data.recurrence_type,
-                    recurrence_num: data.recurrence_num,
+                    title: data.title || 'Untitled Event',
+                    description: data.description || '',
+                    location: data.location || '',
+                    start_time: date_start,
+                    end_time: date_end,
+                    change: data.change || 1,
+                    category: data.category || 'Uncategorized',
                 });
             }
-            
         });
-        console.log(`Events retrieved.`);
+
+        console.log(`Found ${events.length} events for ${month}/${day}/${year}`);
         return events;
-        } catch(error){
+    } catch (error) {
         console.error('Error retrieving events: ', error);
-        return false;
-        }
+        return [];
+    }
 } //returns a list of json objects with each json having each of the event fields (title, description, start and end times, etc.)
-//end time and start time edited in the function so the output is readable (same format as find_event)
+
 
 export {updateTitle, updateRecurrence, updateTime, updateDescription,updateLocation, findEvent, displayEvents};
