@@ -47,7 +47,7 @@ export default function SignIn({ navigation }) {
 
             // Set user context
             setUserEmail(user.email);
-            setUserID(user.uid);
+            setUserID(user.email);
 
             calendar2firebase(user.uid);
 
