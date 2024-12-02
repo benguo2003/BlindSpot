@@ -1,26 +1,44 @@
 import React, { useContext, useState } from 'react';
 import AppContext from '../../contexts/appContext';
 import { useNavigation } from '@react-navigation/native';
-import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity, Animated } from 'react-native';
+import { View, Dimensions, Text, StyleSheet, Image, TouchableOpacity, Animated, TextInput } from 'react-native';
 import Logo from '../../assets/images/blindSpotLogoTransparent.png';
 import Navbar from '../../components/Navbar';
 import Confetti from 'react-native-confetti';
 
 const mockQuestions = [
     {
-        id: 1,
-        question: "How often do you engage in collaborative projects?",
-        options: ["Daily", "Weekly", "Monthly", "Rarely"]
+        id: "Laundry",
+        question: "When did you do your laundry?",
+        type: "choice",
+        options: ["On time!", "A different time", "I didn't do it"]
     },
     {
-        id: 2,
-        question: "What's your preferred method of receiving feedback?",
-        options: ["Written", "Verbal", "Mixed", "Depends on context"]
+        id: "Laundry1",
+        question: "How long does it take you to do your laundry?",
+        type: "time"
     },
     {
-        id: 3,
-        question: "How do you typically handle workplace conflicts?",
-        options: ["Direct discussion", "Seek mediation", "Written communication", "Escalate to management"]
+        id: "Trash",
+        question: "When did you take out the trash?",
+        type: "choice",
+        options: ["On time!", "A different time", "I didn't do it"]
+    },
+    {
+        id: "Trash2",
+        question: "How long does it take you to take out the trash?",
+        type: "time"
+    },
+    {
+        id: "Dishes",
+        question: "When did you do the dishes?",
+        type: "choice",
+        options: ["On time!", "A different time", "I didn't do it"]
+    },
+    {
+        id: "Dishes2",
+        question: "How long does it take you to do the dishes?",
+        type: "time"
     }
 ];
 
@@ -30,6 +48,7 @@ function Surveys() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [answers, setAnswers] = useState({});
     const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [timeInput, setTimeInput] = useState('');
     const confettiRef = React.useRef();
     const [showCompletion, setShowCompletion] = useState(false);
     
@@ -37,44 +56,139 @@ function Surveys() {
         React.useRef(new Animated.Value(index === 0 ? 0 : Dimensions.get('window').width)).current
     );
 
-    const handleAnswer = (answer) => setSelectedAnswer(answer);
-
-    const handleNext = () => {
-        if (!selectedAnswer) return;
-        setAnswers(prev => ({...prev, [currentIndex]: selectedAnswer}));
-    
-        if (currentIndex === mockQuestions.length - 1) {
-            Animated.timing(cardPositions[currentIndex], {
-                toValue: -Dimensions.get('window').width * 1.5,
-                duration: 300,
-                useNativeDriver: true,
-            }).start(() => {
-                setShowCompletion(true);
-                setTimeout(() => {
-                    confettiRef.current?.startConfetti();
-                }, 100);
-            });
-            return;
+    const handleAnswer = (answer) => {
+        if (mockQuestions[currentIndex].type === 'time') {
+            setTimeInput(answer);
+        } else {
+            setSelectedAnswer(answer);
         }
-    
-        Animated.parallel([
-            Animated.timing(cardPositions[currentIndex], {
-                toValue: -Dimensions.get('window').width * 1.5,
-                duration: 300,
-                useNativeDriver: true,
-            }),
-            Animated.timing(cardPositions[currentIndex + 1], {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: true,
-            })
-        ]).start(() => {
-            setCurrentIndex(prev => prev + 1);
-            setSelectedAnswer(null);
-        });
     };
 
-    const QuestionCard = ({ question, options, style }) => (
+    const isValidAnswer = () => {
+        if (mockQuestions[currentIndex].type === 'time') {
+            return timeInput !== '' && !isNaN(timeInput) && parseInt(timeInput) > 0;
+        }
+        return selectedAnswer !== null;
+    };
+
+    const handleNext = () => {
+        const currentAnswer = mockQuestions[currentIndex].type === 'time' ? timeInput : selectedAnswer;
+    
+        if (currentAnswer === "I didn't do it") {
+            // If the user selected "I didn't do it", skip the next question
+            if (currentIndex === mockQuestions.length - 2) {
+                // If this was the last question, complete the survey
+                setAnswers(prev => ({...prev, [currentIndex]: currentAnswer}));
+                setAnswers(prev => ({...prev, [currentIndex + 1]: null}));
+
+                Animated.timing(cardPositions[currentIndex], {
+                    toValue: -Dimensions.get('window').width * 1.5,
+                    duration: 300,
+                    useNativeDriver: true,
+                }).start(() => {
+                    setShowCompletion(true);
+                    setTimeout(() => {
+                        confettiRef.current?.startConfetti();
+                    }, 100);
+                });
+            } else {
+                // Otherwise, move to the question after the next one
+                setAnswers(prev => ({...prev, [currentIndex]: currentAnswer}));
+                setAnswers(prev => ({...prev, [currentIndex + 1]: null}));
+                
+                Animated.parallel([
+                    Animated.timing(cardPositions[currentIndex], {
+                        toValue: -Dimensions.get('window').width * 1.5,
+                        duration: 300,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(cardPositions[currentIndex + 2], {
+                        toValue: 0,
+                        duration: 300,
+                        useNativeDriver: true,
+                    })
+                ]).start(() => {
+                    setCurrentIndex(prev => prev + 2);
+                    setSelectedAnswer(null);
+                    setTimeInput('');
+                });
+            }
+        } else {
+            // If the current answer is not "I didn't do it", save the answer and move to the next question
+            setAnswers(prev => ({...prev, [currentIndex]: currentAnswer}));
+    
+            if (currentIndex === mockQuestions.length - 1) {
+                Animated.timing(cardPositions[currentIndex], {
+                    toValue: -Dimensions.get('window').width * 1.5,
+                    duration: 300,
+                    useNativeDriver: true,
+                }).start(() => {
+                    setShowCompletion(true);
+                    setTimeout(() => {
+                        confettiRef.current?.startConfetti();
+                    }, 100);
+                });
+                return;
+            }
+    
+            Animated.parallel([
+                Animated.timing(cardPositions[currentIndex], {
+                    toValue: -Dimensions.get('window').width * 1.5,
+                    duration: 300,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(cardPositions[currentIndex + 1], {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: true,
+                })
+            ]).start(() => {
+                setCurrentIndex(prev => prev + 1);
+                setSelectedAnswer(null);
+                setTimeInput('');
+            });
+        }
+    };
+
+    const TimeInputCard = ({ question, style }) => {
+        const [localInput, setLocalInput] = useState(timeInput);
+        
+        return (
+            <Animated.View style={[styles.questionCard, style]}>
+                <View style={styles.questionContent}>
+                    <Text style={[styles.questionNumber, { fontFamily: theme.fonts.bold }]} numberOfLines={1}>
+                        Question {currentIndex + 1}/{mockQuestions.length}
+                    </Text>
+                    <Text style={[styles.questionText, { fontFamily: theme.fonts.bold }]} numberOfLines={3}>
+                        {question}
+                    </Text>
+                    <View style={styles.timeInputContainer}>
+                        <TextInput
+                            style={styles.timeInput}
+                            keyboardType="numeric"
+                            placeholder="Enter time in minutes"
+                            value={localInput}
+                            onChangeText={setLocalInput}
+                            onSubmitEditing={() => setTimeInput(localInput)}
+                            maxLength={3}
+                        />
+                        <Text style={styles.minutesLabel}>minutes</Text>
+                    </View>
+                    <TouchableOpacity 
+                        style={styles.nextButton}
+                        onPress={() => {
+                            setTimeInput(localInput);
+                            handleNext();
+                        }}
+                    >
+                        <Text style={styles.nextButtonText}>Next</Text>
+                    </TouchableOpacity>
+                </View>
+            </Animated.View>
+        );
+    };
+
+    const ChoiceCard = ({ question, options, style }) => (
         <Animated.View style={[styles.questionCard, style]}>
             <View style={styles.questionContent}>
                 <Text style={[styles.questionNumber, { fontFamily: theme.fonts.bold }]} numberOfLines={1}>
@@ -158,10 +272,14 @@ function Surveys() {
                                 }
                             ]}
                         >
-                            <QuestionCard
-                                question={question.question}
-                                options={question.options}
-                            />
+                            {question.type === 'time' ? (
+                                <TimeInputCard question={question.question} />
+                            ) : (
+                                <ChoiceCard
+                                    question={question.question}
+                                    options={question.options}
+                                />
+                            )}
                         </Animated.View>
                     ))
                 ) : (
@@ -179,11 +297,12 @@ function Surveys() {
                         <Confetti ref={confettiRef} count={50} />
                     </>
                 )}
-                </View>
+            </View>
             <Navbar navigation={navigation} />
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -345,12 +464,32 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         borderRadius: 25,
         marginTop: 30,
-        border: 2,
     },
     doneButtonText: {
         color: 'black',
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    timeInputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 20,
+    },
+    timeInput: {
+        backgroundColor: '#F5F0F7',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#D1C1DB',
+        padding: 16,
+        fontSize: 16,
+        width: 120,
+        textAlign: 'center',
+        marginRight: 10,
+    },
+    minutesLabel: {
+        fontSize: 16,
+        color: '#333',
     },
 });
 
