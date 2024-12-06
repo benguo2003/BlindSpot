@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: EventModal.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: EventModal.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from 'react';
+import { 
+    View, 
+    Modal,
+    Text, 
+    StyleSheet, 
+    TouchableOpacity, 
+    ScrollView,
+    TextInput,
+    Dimensions
+} from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+
+
+/**
+ * Modal component for creating, viewing, editing and deleting calendar events.
+ * @param {Object} props - Component props
+ * @param {boolean} props.visible - Whether modal is visible
+ * @param {Object} props.event - Event object containing event details (title, times, etc)
+ * @param {Function} props.onClose - Callback when modal is closed
+ * @param {Function} props.onDelete - Callback when event is deleted
+ * @param {Function} props.onSave - Callback when event is saved
+ * @param {boolean} props.isEditing - Whether modal is in edit mode
+ * @param {Function} props.setIsEditing - Function to toggle edit mode
+ * @param {boolean} props.isSaving - Whether save operation is in progress
+ * @param {string} props.selected - Selected date in YYYY-MM-DD format
+ * @returns {JSX.Element} Modal component for event management
+*/
+const EventModal = ({ 
+    visible, 
+    event, 
+    onClose, 
+    onDelete, 
+    onSave, 
+    isEditing, 
+    setIsEditing,
+    isSaving,
+    selected
+}) => {
+    const [editedFields, setEditedFields] = useState({
+        title: '',
+        category: '',
+        startTime: new Date(),
+        endTime: new Date(),
+        description: '',
+    });
+
+    const defaultDate = selected ? new Date(selected) : new Date();
+    defaultDate.setHours(9, 0, 0, 0);
+    const defaultEndDate = new Date(defaultDate);
+    defaultEndDate.setHours(10, 0, 0, 0);
+
+    useEffect(() => {
+        if (event) {
+            setEditedFields({
+                title: event.title || '',
+                category: event.category || '',
+                startTime: new Date(event.start_time),
+                endTime: new Date(event.end_time),
+                description: event.description || '',
+            });
+        } else if (selected) {
+            // Reset fields when modal becomes visible and there's no event
+            const [year, month, day] = selected.split('-');
+            const defaultDate = new Date(year, month - 1, day, 9, 0, 0);
+            const defaultEndDate = new Date(year, month - 1, day, 10, 0, 0);
+            
+            setEditedFields({
+                title: '',
+                category: '',
+                startTime: defaultDate,
+                endTime: defaultEndDate,
+                description: '',
+            });
+        }
+    }, [event, selected, visible]);
+
+    const formatTime = (date) => {
+        if (!date) return '';
+        const options = { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'America/Los_Angeles'
+        };
+        return date.toLocaleTimeString([], options);
+    };
+
+    const handleSave = () => {
+        onSave(editedFields);
+    };
+
+    const formatDisplayDate = (date) => {
+        if (!date) return '';
+        const options = { 
+            month: 'short', 
+            day: 'numeric',
+            year: 'numeric'
+        };
+        return new Date(date).toLocaleDateString('en-US', options);
+    };
+
+    const [isStartPickerVisible, setStartPickerVisible] = useState(false);
+    const [isEndPickerVisible, setEndPickerVisible] = useState(false);
+
+    return (
+        &lt;Modal
+            visible={visible}
+            animationType="slide"
+            transparent={true}
+            onRequestClose={onClose}
+        >
+            &lt;View style={styles.centeredView}>
+                &lt;View style={styles.modalView}>
+                    &lt;View style={styles.modalHeader}>
+                        &lt;Text style={styles.modalTitle}>
+                            {event ? `${event.title} | ${formatDisplayDate(event.start_time)}` : 'Create Event'}
+                        &lt;/Text>
+                        &lt;TouchableOpacity onPress={onClose}>
+                            &lt;Text style={styles.closeButton}>✕&lt;/Text>
+                        &lt;/TouchableOpacity>
+                    &lt;/View>
+
+                    &lt;ScrollView style={styles.modalBody}>
+                        {isEditing ? (
+                            &lt;View style={styles.editSection}>
+                                &lt;Text style={styles.inputLabel}>Title&lt;/Text>
+                                &lt;TextInput
+                                    style={styles.input}
+                                    value={editedFields.title}
+                                    onChangeText={(text) => 
+                                        setEditedFields(prev => ({...prev, title: text}))
+                                    }
+                                    placeholder="Event Title"
+                                />
+                                
+                                &lt;View style={styles.dateTimeField}>
+                                    &lt;Text style={styles.label}>Start Time&lt;/Text>
+                                    &lt;TouchableOpacity 
+                                        style={styles.dateTimeButton}
+                                        onPress={() => setStartPickerVisible(true)}
+                                    >
+                                        &lt;Text style={styles.dateTimeText}>
+                                            {formatTime(editedFields.startTime)}
+                                        &lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;DateTimePickerModal
+                                        isVisible={isStartPickerVisible}
+                                        mode="datetime"
+                                        date={editedFields.startTime}
+                                        onConfirm={(date) => {
+                                            setEditedFields(prev => ({...prev, startTime: date}));
+                                            setStartPickerVisible(false);
+                                        }}
+                                        onCancel={() => setStartPickerVisible(false)}
+                                    />
+                                &lt;/View>
+                            
+                                &lt;View style={styles.dateTimeField}>
+                                    &lt;Text style={styles.label}>End Time&lt;/Text>
+                                    &lt;TouchableOpacity 
+                                        style={styles.dateTimeButton}
+                                        onPress={() => setEndPickerVisible(true)}
+                                    >
+                                        &lt;Text style={styles.dateTimeText}>
+                                            {formatTime(editedFields.endTime)}
+                                        &lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;DateTimePickerModal
+                                        isVisible={isEndPickerVisible}
+                                        mode="datetime"
+                                        date={editedFields.endTime}
+                                        onConfirm={(date) => {
+                                            setEditedFields(prev => ({...prev, endTime: date}));
+                                            setEndPickerVisible(false);
+                                        }}
+                                        onCancel={() => setEndPickerVisible(false)}
+                                    />
+                                &lt;/View>
+                            
+                                &lt;Text style={styles.inputLabel}>Category&lt;/Text>
+                                &lt;TextInput
+                                    style={styles.input}
+                                    value={editedFields.category}
+                                    onChangeText={(text) => 
+                                        setEditedFields(prev => ({...prev, category: text}))
+                                    }
+                                    placeholder="Category"
+                                />
+                            
+                                &lt;Text style={styles.inputLabel}>Description&lt;/Text>
+                                &lt;TextInput
+                                    style={[styles.input, styles.descriptionInput]}
+                                    multiline
+                                    value={editedFields.description}
+                                    onChangeText={(text) => 
+                                        setEditedFields(prev => ({...prev, description: text}))
+                                    }
+                                    placeholder="Description"
+                                />
+                                &lt;View style={styles.buttonContainer}>
+                                    &lt;TouchableOpacity 
+                                        style={[styles.button, styles.saveButton]}
+                                        onPress={handleSave}
+                                    >
+                                        &lt;Text style={styles.buttonText}>
+                                            {isSaving ? 'Saving...' : 'Save'}
+                                        &lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;TouchableOpacity 
+                                        style={[styles.button, styles.cancelButton]}
+                                        onPress={() => setIsEditing(false)}
+                                    >
+                                        &lt;Text style={styles.buttonText}>Cancel&lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                &lt;/View>
+                            &lt;/View>
+                        ) : (
+                            &lt;View style={styles.viewSection}>
+                                &lt;View style={styles.eventInfo}>
+                                    &lt;Text style={styles.timeText}>
+                                        {formatTime(event?.start_time)} - {formatTime(event?.end_time)}
+                                    &lt;/Text>
+                                    &lt;Text style={styles.categoryText}>
+                                        {event?.category}
+                                    &lt;/Text>
+                                    &lt;Text style={styles.descriptionText}>
+                                        {event?.description || 'No description available'}
+                                    &lt;/Text>
+                                &lt;/View>
+                                
+                                &lt;View style={styles.buttonContainer}>
+                                    &lt;TouchableOpacity 
+                                        style={[styles.button, styles.editButton]}
+                                        onPress={() => setIsEditing(true)}
+                                    >
+                                        &lt;Text style={styles.buttonText}>Edit&lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;TouchableOpacity 
+                                        style={[styles.button, styles.deleteButton]}
+                                        onPress={() => onDelete(event?.id, event?.title)}
+                                    >
+                                        &lt;Text style={styles.buttonText}>Delete&lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                &lt;/View>
+                            &lt;/View>
+                        )}
+                    &lt;/ScrollView>
+                &lt;/View>
+            &lt;/View>
+        &lt;/Modal>
+    );
+};
+
+const styles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalView: {
+        width: '90%',
+        maxHeight: '80%',
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+        paddingBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E0E0E0',
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: 'purple',
+    },
+    closeButton: {
+        fontSize: 24,
+        color: '#666',
+        padding: 5,
+    },
+    modalBody: {
+        marginBottom: 20,
+    },
+    viewSection: {
+        gap: 20,
+    },
+    eventInfo: {
+        gap: 10,
+    },
+    timeText: {
+        fontSize: 16,
+        color: '#666',
+    },
+    categoryText: {
+        fontSize: 16,
+        color: '#666',
+        fontWeight: '500',
+    },
+    descriptionText: {
+        fontSize: 14,
+        color: '#444',
+        lineHeight: 20,
+    },
+    editSection: {
+        gap: 15,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#DDD',
+        borderRadius: 10,
+        padding: 12,
+        fontSize: 16,
+        backgroundColor: '#FFF',
+    },
+    descriptionInput: {
+        minHeight: 100,
+        textAlignVertical: 'top',
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: '#666',
+        marginBottom: 5,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginTop: 20,
+    },
+    button: {
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 10,
+        minWidth: 120,
+        alignItems: 'center',
+    },
+    editButton: {
+        backgroundColor: '#6B4EE6',
+    },
+    deleteButton: {
+        backgroundColor: '#FF4444',
+    },
+    saveButton: {
+        backgroundColor: '#4CAF50',
+    },
+    cancelButton: {
+        backgroundColor: '#666',
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    dateTimeField: {
+        marginBottom: 15,
+    },
+    dateTimeButton: {
+        backgroundColor: '#F0F0F0',
+        padding: 12,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#DDD',
+    },
+    dateTimeText: {
+        fontSize: 16,
+        color: '#333',
+    },
+    inputLabel: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: 'purple',
+        marginBottom: 5,
+    },
+});
+
+export default EventModal;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#CalendarDay">CalendarDay</a></li><li><a href="global.html#EventModal">EventModal</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#ScrollableEventList">ScrollableEventList</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Dec 05 2024 23:08:14 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

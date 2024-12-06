@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: CalendarDay.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: CalendarDay.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
+import AppContext from '../contexts/appContext';
+
+/**
+ * Renders a single day component for a calendar interface. Shows day name and number with selection state.
+ * @param {Object} props - Component props
+ * @param {number} props.dayIndex - Index of the day (0-6 for Mon-Sun)
+ * @param {number} props.dayNum - Numeric day of month (1-31)
+ * @param {Date} props.date - Full date object for this day
+ * @param {string} props.colorDefault - Background color when unselected
+ * @param {string} props.colorSelect - Background color when selected 
+ * @param {number} props.widthSize - Width of the day component
+ * @param {number} props.fontSizeDayName - Font size for day name (Mon, Tue, etc)
+ * @param {number} props.fontSizeDayNum - Font size for day number
+ * @param {boolean} props.isSelected - Whether this day is currently selected
+ * @param {Function} props.onPress - Callback function when day is pressed
+ * @returns {JSX.Element} A pressable day component for calendar
+*/
+const CalendarDay = ({
+    dayIndex = 0,
+    dayNum = 1,
+    date,
+    colorDefault = 'white',
+    colorSelect = '#6A0DAD',
+    widthSize = 44,
+    fontSizeDayName = 12,
+    fontSizeDayNum = 20,
+    isSelected = false,
+    onPress,
+}) => {
+    const { theme } = useContext(AppContext);
+    const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
+
+    useEffect(() => {
+        const subscription = Dimensions.addEventListener('change', () => {
+            setScreenWidth(Dimensions.get('window').width);
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
+
+    const getDayName = (dayIndex) => {
+        const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+        return days[dayIndex];
+    };
+
+    const handlePress = () => {
+        if (onPress &amp;&amp; date) {
+            onPress(date);
+        }
+    };
+
+    return (
+        &lt;TouchableOpacity 
+            style={[
+                styles.container, 
+                {
+                    width: widthSize,
+                    backgroundColor: isSelected ? colorSelect : colorDefault
+                }
+            ]}
+            onPress={handlePress}  // Add the onPress handler
+        >
+            &lt;View style={styles.card}>
+                &lt;Text 
+                    style={{
+                        fontSize: fontSizeDayName, 
+                        color: isSelected ? 'white' : 'black'
+                    }}
+                >
+                    {getDayName(dayIndex)}
+                &lt;/Text>
+                &lt;Text 
+                    style={[
+                        styles.dayNum, 
+                        {
+                            fontSize: fontSizeDayNum, 
+                            color: isSelected ? 'white' : 'black',
+                            fontFamily: theme.fonts.regular
+                        }
+                    ]}
+                >
+                    {dayNum}
+                &lt;/Text>
+            &lt;/View>
+        &lt;/TouchableOpacity>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        height: 80,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+        marginVertical: 5,
+        marginHorizontal: 2,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 5,
+    },
+    card: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column',
+    },
+    dayName: {
+        color: 'black',
+    },
+    dayNum: {
+        color: 'black',
+    },
+});
+
+export default CalendarDay;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#CalendarDay">CalendarDay</a></li><li><a href="global.html#EventModal">EventModal</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#ScrollableEventList">ScrollableEventList</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Dec 05 2024 23:08:14 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
