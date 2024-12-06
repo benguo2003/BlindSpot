@@ -8,10 +8,11 @@ import { AppProvider } from './contexts/appContext';
 export default function App() {
     const [userEmail, setUserEmail] = useState(null);
     const [userID, setUserID] = useState(null);
+    const [userName, setUserName] = useState(null);
     //console.log(Dimensions.get('window').height);
 
     return (
-        <AppProvider value={{ userEmail, setUserEmail, userID, setUserID }}>
+        <AppProvider value={{ userEmail, setUserEmail, userID, setUserID, userName, setUserName }}>
             <NavigationContainer>
                 <SafeAreaView style={styles.container}>
                     <RNStatusBar style="auto" />
