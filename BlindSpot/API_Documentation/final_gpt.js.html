@@ -1,4 +1,32 @@
-import axios from 'axios';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: final_gpt.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: final_gpt.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import axios from 'axios';
 const { addEvent } = require('./addEvent');
 import { displayEvents } from "./updateEvent";
 import {
@@ -38,7 +66,7 @@ function getTaskHistory(user_id, micro_tasks){
     ]
 
     relevant_micro_tasks = []
-    for (let i = 0; i < micro_events.length; i++){
+    for (let i = 0; i &lt; micro_events.length; i++){
         if (micro_tasks.includes(micro_events[i].name)){
             relevant_micro_tasks.push(micro_events[i])
         }
@@ -104,7 +132,7 @@ export async function askGPT(user_id, questionType, microTasks, day, month, year
         response = "[" + response.split("[")[1].split("]")[0] + "]";
         const jsonArray = JSON.parse(response);
         
-        for (let i = 0; i < jsonArray.length; i++) {
+        for (let i = 0; i &lt; jsonArray.length; i++) {
             if (microTasks.includes(jsonArray[i].task_name)) {
                 const [startHour, startMinute] = jsonArray[i].start_time.split(":").map(Number);
                 const [endHour, endMinute] = jsonArray[i].end_time.split(":").map(Number);
@@ -194,7 +222,7 @@ Details of Day:
 
 
     var event_names = [];
-    for (let i = 0; i < formattedEvents.length; i++) {
+    for (let i = 0; i &lt; formattedEvents.length; i++) {
         eventInstructions += JSON.stringify(formattedEvents[i], null, 0);
         eventInstructions += '\n'
         event_names.push(formattedEvents[i].title);
@@ -208,7 +236,7 @@ Details of Day:
         case 2:
             eventInstructions += 'Events to be Added, along with an estimate of how long the user took (in minutes) the last few times to help you with your prediction: \n';
             time_hist = getTaskHistory(user_id, microTasks);
-            for (let i = 0; i < time_hist.length; i++){
+            for (let i = 0; i &lt; time_hist.length; i++){
                 eventInstructions += `${time_hist[i].name}: ${(time_hist[i].time_history).join(", ")}`
                 eventInstructions += '\n'
             }
@@ -243,7 +271,7 @@ async function scheduleMod(user_id, task_name, new_start, new_end, isDelete) {
         const jsonArray = JSON.parse(response);
         console.log(jsonArray);
 
-        for (let i = 0; i < jsonArray.length; i++){
+        for (let i = 0; i &lt; jsonArray.length; i++){
             var event = jsonArray[i]
             if (microtask_events.includes(event.task_name)){
                 updateTime(user_id, event.task_name, event.start_time.split(":")[0],  new Date(year, month, day, event.start_time.split(":")[1]).getTime(),  new Date(year, month, day, event.end_time.split(":")[0], event.end_time.split(":")[1]).getTime());
@@ -287,7 +315,7 @@ Details of Day:
 
     var event_names = [];
     var microtask_events = [];
-    for (let i = 0; i < events.length; i++) {
+    for (let i = 0; i &lt; events.length; i++) {
         eventInstructions += JSON.stringify(events[i], null, 0);
         eventInstructions += '\n'
         event_names.push(events[i].title);
@@ -313,4 +341,26 @@ Details of Day:
     response = await chatGPTRequest(system_prompt, eventInstructions);
     console.log(response)
     await parseResponse(user_id, response, microtask_events);
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addEvent">addEvent</a></li><li><a href="global.html#addUserToUsersCollection">addUserToUsersCollection</a></li><li><a href="global.html#askGPT">askGPT</a></li><li><a href="global.html#calendar2firebase">calendar2firebase</a></li><li><a href="global.html#chatGPTRequest">chatGPTRequest</a></li><li><a href="global.html#displayEvents">displayEvents</a></li><li><a href="global.html#displayEvents2">displayEvents2</a></li><li><a href="global.html#findEvent">findEvent</a></li><li><a href="global.html#getStartEndTime">getStartEndTime</a></li><li><a href="global.html#getTaskHistory">getTaskHistory</a></li><li><a href="global.html#removeEvent">removeEvent</a></li><li><a href="global.html#retrieveInfo">retrieveInfo</a></li><li><a href="global.html#scheduleMod">scheduleMod</a></li><li><a href="global.html#updateDescription">updateDescription</a></li><li><a href="global.html#updateEvent">updateEvent</a></li><li><a href="global.html#updateLocation">updateLocation</a></li><li><a href="global.html#updateProfile">updateProfile</a></li><li><a href="global.html#updateProfileObject">updateProfileObject</a></li><li><a href="global.html#updateRecurrence">updateRecurrence</a></li><li><a href="global.html#updateTime">updateTime</a></li><li><a href="global.html#updateTitle">updateTitle</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Dec 05 2024 22:20:13 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

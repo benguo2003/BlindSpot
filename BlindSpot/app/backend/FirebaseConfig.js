@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import {getStorage, ref} from "firebase/storage";
@@ -15,15 +14,8 @@ import {
   FIREBASE_STORAGE_BUCKET,
   FIREBASE_MESSAGING_SENDER_ID,
   FIREBASE_APP_ID,
-  OPENAI_API_KEY,
-  OPENAI_PROJECT_ID,
 } from '@env';
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
     apiKey: FIREBASE_API_KEY,
     authDomain: FIREBASE_AUTH_DOMAIN,
@@ -43,32 +35,3 @@ const auth = initializeAuth(FIREBASE_APP, {
 export const FIREBASE_AUTH = getAuth(FIREBASE_APP);
 export const FIREBASE_DB = getFirestore(FIREBASE_APP);
 export const STORAGE = getStorage(FIREBASE_APP);
-
-//console.log(FIREBASE_API_KEY);
-
- async function chatGPTRequest(question) {
-  const url = 'https://api.openai.com/v1/chat/completions';
-  const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
-      'Openai-Project': OPENAI_PROJECT_ID,
-  };
-
-  const data = {
-      model: 'gpt-3.5-turbo',
-      messages: [
-          { role: 'user', content: question}
-      ]
-  };
-  try {
-      //   console.log(OPENAI_API_KEY, OPENAI_PROJECT_ID);
-      const response = await axios.post(url, data, { headers });
-      //console.log('Response:', response.data);
-      console.log(response.data.choices[0].message.content);
-  } catch (error) {
-      console.error('Error:', error);
-  }
-}
-
-// question = "What is the best time to have breakfast?";
-// chatGPTRequest(question);

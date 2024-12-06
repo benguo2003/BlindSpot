@@ -1,6 +1,11 @@
 import { FIREBASE_DB} from './FirebaseConfig';
 import {doc, getDoc, query, where, getDocs, deleteDoc, collection} from 'firebase/firestore';
-//both parameters as strings
+
+/**
+ * Removes a calendar event from the database. Returns success/error message.
+ * @param {string} userID - The unique identifier for the current user
+ * @param {string} event_title - Title of the event to be removed
+*/
 async function removeEvent(userID, event_title){
     try{
         const userRef = doc(FIREBASE_DB, 'users', userID);
