@@ -3,17 +3,32 @@ import { useContext, useEffect, useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, Dimensions } from 'react-native';
 import AppContext from '../contexts/appContext';
 
+/**
+ * Renders a single day component for a calendar interface. Shows day name and number with selection state.
+ * @param {Object} props - Component props
+ * @param {number} props.dayIndex - Index of the day (0-6 for Mon-Sun)
+ * @param {number} props.dayNum - Numeric day of month (1-31)
+ * @param {Date} props.date - Full date object for this day
+ * @param {string} props.colorDefault - Background color when unselected
+ * @param {string} props.colorSelect - Background color when selected 
+ * @param {number} props.widthSize - Width of the day component
+ * @param {number} props.fontSizeDayName - Font size for day name (Mon, Tue, etc)
+ * @param {number} props.fontSizeDayNum - Font size for day number
+ * @param {boolean} props.isSelected - Whether this day is currently selected
+ * @param {Function} props.onPress - Callback function when day is pressed
+ * @returns {JSX.Element} A pressable day component for calendar
+*/
 const CalendarDay = ({
     dayIndex = 0,
     dayNum = 1,
-    date, // Add this prop
+    date,
     colorDefault = 'white',
     colorSelect = '#6A0DAD',
     widthSize = 44,
     fontSizeDayName = 12,
     fontSizeDayNum = 20,
     isSelected = false,
-    onPress, // Add this prop
+    onPress,
 }) => {
     const { theme } = useContext(AppContext);
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);

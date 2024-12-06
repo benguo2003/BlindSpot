@@ -8,6 +8,13 @@ import calendarCurrent from '../assets/navbar/calendar_current.png';
 import surveys from '../assets/navbar/surveys.png';
 import surveysCurrent from '../assets/navbar/surveys_current.png';
 
+/**
+ * Navigation bar component with three main tabs: Surveys, Home, and Calendar.
+ * Shows active state for current tab and handles navigation between screens.
+ * @param {Object} props - Component props
+ * @param {Object} props.navigation - React Navigation navigation object
+ * @returns {JSX.Element} Bottom navigation bar with icons
+*/
 const Navbar = ({navigation}) => {
     const route = useRoute();
 

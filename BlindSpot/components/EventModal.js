@@ -12,6 +12,21 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
+
+/**
+ * Modal component for creating, viewing, editing and deleting calendar events.
+ * @param {Object} props - Component props
+ * @param {boolean} props.visible - Whether modal is visible
+ * @param {Object} props.event - Event object containing event details (title, times, etc)
+ * @param {Function} props.onClose - Callback when modal is closed
+ * @param {Function} props.onDelete - Callback when event is deleted
+ * @param {Function} props.onSave - Callback when event is saved
+ * @param {boolean} props.isEditing - Whether modal is in edit mode
+ * @param {Function} props.setIsEditing - Function to toggle edit mode
+ * @param {boolean} props.isSaving - Whether save operation is in progress
+ * @param {string} props.selected - Selected date in YYYY-MM-DD format
+ * @returns {JSX.Element} Modal component for event management
+*/
 const EventModal = ({ 
     visible, 
     event, 

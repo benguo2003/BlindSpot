@@ -23,6 +23,20 @@ const PRIORITY_FACTORS = {
     3: 0.8,  // Darker
 };
 
+/**
+ * Scrollable timeline view that displays events for a given day with time slots and colored event cards.
+ * Supports refresh, event selection, and dynamic time-based display.
+ * @param {Object} props - Component props
+ * @param {Array} props.events - Array of event objects to display
+ * @param {Date} props.selectedDate - Currently selected date to display events for
+ * @param {boolean} props.isLoading - Whether events are currently loading
+ * @param {Function} props.onEventPress - Callback when an event is pressed
+ * @param {Function} props.onRefresh - Callback for pull-to-refresh
+ * @param {boolean} props.refreshing - Whether refresh is in progress
+ * @param {Object} props.containerStyle - Additional styles for container
+ * @param {string} props.backgroundColor - Background color for the timeline
+ * @returns {JSX.Element} Scrollable timeline with events
+*/
 const ScrollableEventList = ({ 
     events = [],
     selectedDate,
