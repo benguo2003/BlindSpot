@@ -14,7 +14,7 @@ jobs:
       - name: 🏗 Setup Node
         uses: actions/setup-node@v3
         with:
-          cache-dependency-path: ../BlindSpot/package-lock.jsons
+          cache-dependency-path: BlindSpot/package-lock.json
           node-version: 20.x
           cache: npm
 
