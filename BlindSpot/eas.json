@@ -25,11 +25,7 @@
   },
   "submit": {
     "production": {
-      "ios": {
-        "appleId": "${process.env.APPLE_ID}",
-        "ascAppId": "${process.env.ASC_APP_ID}",
-        "appleTeamId": "${process.env.APPLE_TEAM_ID}"
-      }
+      "ios": {}
     }
   }
 }
