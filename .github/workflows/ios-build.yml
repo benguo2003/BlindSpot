@@ -2,7 +2,7 @@ name: iOS TestFlight Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ prod ]
 
 jobs:
   build:
