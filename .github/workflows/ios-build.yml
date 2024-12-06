@@ -30,10 +30,13 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
+      - name: 🔐 Setup submission credentials
+        run: |
+          sed -i "s/APPLE_ID/${{ secrets.APPLE_ID }}/g" eas.json
+          sed -i "s/ASC_APP_ID/${{ secrets.ASC_APP_ID }}/g" eas.json
+          sed -i "s/APPLE_TEAM_ID/${{ secrets.APPLE_TEAM_ID }}/g" eas.json
+
       - name: 🚀 Build and submit to TestFlight
         env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         run: eas build --platform ios --non-interactive --no-wait --auto-submit
