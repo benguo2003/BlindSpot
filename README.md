@@ -85,10 +85,31 @@ It is recommended to [create periodic releases](https://docs.github.com/en/free-
 
 ### Using a CI/CD pipeline
 
-Every repository needs to have a way to build its artifacts headlessly. It is a good idea to run tests as part of such build. Instructions on how to build the components in a repository needs to be documented in the repository's README.md.
+This project implements a Continuous Integration and Continuous Deployment (CI/CD) pipeline using GitHub Actions to automate the build and deployment process to TestFlight.
 
-A repository can also be setup to build continuously whenever a commit is pushed to the `master` branch by setting up a CI script (e.g., [Travis CI](https://www.travis-ci.com/)) in its root folder. Such script will configure the build environment (as a virtual machine) and invoke the build script on the `master` branch. If the script fails for some reason, the committer will be notified to fix it. It is a good practice to add a build [badge](https://shields.io/category/version) to the README.md file to visibly indicate the status of the last CI build (Travis CI provides such badges). 
+### Pipeline Overview
 
-The CI script will also be run when a new pull request is created or when more commits are pushed to its linked `issue` branch. Such build assures peer reviewers that the new commits when accepted will not break the build. In fact, a successful CI build can be a prerequisute for peer reviewers to look at the changes.
+The pipeline automatically triggers when code is pushed to the `prod` branch. Here's how it works:
 
-When a tag is pushed to the `master` branch, the CI script will additionally deliver and/or deploy the built artifact(s). The script can also be configured to create a Github release based on the tag.
+1. **Trigger**: Push to prod branch initiates the workflow
+2. **Environment Setup**: 
+   - Configures Node.js environment (v20.x)
+   - Sets up EAS (Expo Application Services)
+   - Installs project dependencies
+3. **Build Process**: 
+   - EAS builds the iOS application
+   - Automatically increments build numbers
+4. **Deployment**:
+   - Automatically submits build to TestFlight
+   - Requires manual approval of export compliance questions in TestFlight
+
+### Pipeline Location
+
+The CI/CD pipeline is defined in `.github/workflows/ios-build.yml`
+
+### How to Trigger Builds
+
+#### Automatic Builds
+Pushing to the prod branch automatically triggers the build process:
+```bash
+git push origin prod
