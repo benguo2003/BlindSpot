@@ -4,6 +4,7 @@ import Checkbox from 'expo-checkbox';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FIREBASE_DB, FIREBASE_AUTH } from '../backend/FirebaseConfig';
+import { getUserData } from '../backend/UserDataAccess';
 import logo from '../../assets/images/blindSpotTextLogoTransparent.png';
 import AppContext from '../../contexts/appContext';
 import Icon from 'react-native-vector-icons/Feather';
@@ -16,6 +17,7 @@ const screenHeight = Dimensions.get('window').height;
 export default function SignIn({ navigation }) {
     const { userEmail, setUserEmail } = useContext(AppContext);
     const { userID, setUserID } = useContext(AppContext);
+    const { userName, setUserName } = useContext(AppContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [savePassword, setSavePassword] = useState(false);
@@ -45,9 +47,19 @@ export default function SignIn({ navigation }) {
                 }
             }
 
-            // Set user context
-            setUserEmail(user.email);
-            setUserID(user.email);
+            try {
+                const userData = await getUserData(user.email);
+                if (userData) {
+                    setUserEmail(userData.email);
+                    setUserID(userData.email);
+                    setUserName(userData.name);
+
+                } else {
+                    throw new Error('User data not found');
+                }
+            } catch (error) {
+                console.error('Error getting user data:', error);
+            }
 
 
             // Navigate to home screen

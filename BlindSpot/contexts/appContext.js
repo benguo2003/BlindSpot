@@ -14,6 +14,7 @@ export const AppProvider = ({ children }) => {
 
     const [userEmail, setUserEmail] = useState(null);
     const [userID, setUserID] = useState(null);
+    const [userName, setUserName] = useState(null);
 
     if (!fontsLoaded) {
         return (
@@ -24,7 +25,7 @@ export const AppProvider = ({ children }) => {
     }
 
     return (
-        <AppContext.Provider value={{ theme, userEmail, setUserEmail, userID, setUserID }}>
+        <AppContext.Provider value={{ theme, userEmail, setUserEmail, userID, setUserID, userName, setUserName }}>
             {children}
         </AppContext.Provider>
     );

@@ -25,6 +25,7 @@ export default function SignUp({ navigation }) {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const { userID, setUserID } = useContext(AppContext);
+    const { userName, setUserName } = useContext(AppContext);
     const [name, setName] = useState('');
 
     const handleSignUp = async () => {
@@ -54,6 +55,7 @@ export default function SignUp({ navigation }) {
             Alert.alert('Success', 'Account created successfully!');
             navigation.navigate('FirstSurvey');
             setUserID(user_id);
+            setUserName(name);
             calendar2firebase(user_id);
         } catch (error) {
             console.error('Error creating account:', error);

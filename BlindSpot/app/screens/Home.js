@@ -45,7 +45,7 @@ const PRIORITY_FACTORS = {
 
 function Home() {
     const navigation = useNavigation();
-    const { theme, userID } = useContext(AppContext);
+    const { theme, userID, userName } = useContext(AppContext);
 
     const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
     const [screenHeight, setScreenHeight] = useState(Dimensions.get('window').height);
@@ -537,7 +537,7 @@ function Home() {
             <View style={styles.header}>
                 <View style={styles.headerBox}>
                     <Text style={[styles.headerText, { fontFamily: theme.fonts.regular }]}>
-                        Welcome Back, Liz
+                        Welcome Back, {userName}!
                     </Text>
                     <TouchableOpacity 
                         style={styles.profileButton}
