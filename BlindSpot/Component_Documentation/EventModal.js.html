@@ -1,4 +1,32 @@
-import React, { useState, useEffect } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: EventModal.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: EventModal.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useState, useEffect } from 'react';
 import { 
     View, 
     Modal,
@@ -105,28 +133,28 @@ const EventModal = ({
     const [isEndPickerVisible, setEndPickerVisible] = useState(false);
 
     return (
-        <Modal
+        &lt;Modal
             visible={visible}
             animationType="slide"
             transparent={true}
             onRequestClose={onClose}
         >
-            <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                    <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>
+            &lt;View style={styles.centeredView}>
+                &lt;View style={styles.modalView}>
+                    &lt;View style={styles.modalHeader}>
+                        &lt;Text style={styles.modalTitle}>
                             {event ? `${event.title} | ${formatDisplayDate(event.start_time)}` : 'Create Event'}
-                        </Text>
-                        <TouchableOpacity onPress={onClose}>
-                            <Text style={styles.closeButton}>✕</Text>
-                        </TouchableOpacity>
-                    </View>
+                        &lt;/Text>
+                        &lt;TouchableOpacity onPress={onClose}>
+                            &lt;Text style={styles.closeButton}>✕&lt;/Text>
+                        &lt;/TouchableOpacity>
+                    &lt;/View>
 
-                    <ScrollView style={styles.modalBody}>
+                    &lt;ScrollView style={styles.modalBody}>
                         {isEditing ? (
-                            <View style={styles.editSection}>
-                                <Text style={styles.inputLabel}>Title</Text>
-                                <TextInput
+                            &lt;View style={styles.editSection}>
+                                &lt;Text style={styles.inputLabel}>Title&lt;/Text>
+                                &lt;TextInput
                                     style={styles.input}
                                     value={editedFields.title}
                                     onChangeText={(text) => 
@@ -135,17 +163,17 @@ const EventModal = ({
                                     placeholder="Event Title"
                                 />
                                 
-                                <View style={styles.dateTimeField}>
-                                    <Text style={styles.label}>Start Time</Text>
-                                    <TouchableOpacity 
+                                &lt;View style={styles.dateTimeField}>
+                                    &lt;Text style={styles.label}>Start Time&lt;/Text>
+                                    &lt;TouchableOpacity 
                                         style={styles.dateTimeButton}
                                         onPress={() => setStartPickerVisible(true)}
                                     >
-                                        <Text style={styles.dateTimeText}>
+                                        &lt;Text style={styles.dateTimeText}>
                                             {formatTime(editedFields.startTime)}
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <DateTimePickerModal
+                                        &lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;DateTimePickerModal
                                         isVisible={isStartPickerVisible}
                                         mode="datetime"
                                         date={editedFields.startTime}
@@ -155,19 +183,19 @@ const EventModal = ({
                                         }}
                                         onCancel={() => setStartPickerVisible(false)}
                                     />
-                                </View>
+                                &lt;/View>
                             
-                                <View style={styles.dateTimeField}>
-                                    <Text style={styles.label}>End Time</Text>
-                                    <TouchableOpacity 
+                                &lt;View style={styles.dateTimeField}>
+                                    &lt;Text style={styles.label}>End Time&lt;/Text>
+                                    &lt;TouchableOpacity 
                                         style={styles.dateTimeButton}
                                         onPress={() => setEndPickerVisible(true)}
                                     >
-                                        <Text style={styles.dateTimeText}>
+                                        &lt;Text style={styles.dateTimeText}>
                                             {formatTime(editedFields.endTime)}
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <DateTimePickerModal
+                                        &lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;DateTimePickerModal
                                         isVisible={isEndPickerVisible}
                                         mode="datetime"
                                         date={editedFields.endTime}
@@ -177,10 +205,10 @@ const EventModal = ({
                                         }}
                                         onCancel={() => setEndPickerVisible(false)}
                                     />
-                                </View>
+                                &lt;/View>
                             
-                                <Text style={styles.inputLabel}>Category</Text>
-                                <TextInput
+                                &lt;Text style={styles.inputLabel}>Category&lt;/Text>
+                                &lt;TextInput
                                     style={styles.input}
                                     value={editedFields.category}
                                     onChangeText={(text) => 
@@ -189,8 +217,8 @@ const EventModal = ({
                                     placeholder="Category"
                                 />
                             
-                                <Text style={styles.inputLabel}>Description</Text>
-                                <TextInput
+                                &lt;Text style={styles.inputLabel}>Description&lt;/Text>
+                                &lt;TextInput
                                     style={[styles.input, styles.descriptionInput]}
                                     multiline
                                     value={editedFields.description}
@@ -199,57 +227,57 @@ const EventModal = ({
                                     }
                                     placeholder="Description"
                                 />
-                                <View style={styles.buttonContainer}>
-                                    <TouchableOpacity 
+                                &lt;View style={styles.buttonContainer}>
+                                    &lt;TouchableOpacity 
                                         style={[styles.button, styles.saveButton]}
                                         onPress={handleSave}
                                     >
-                                        <Text style={styles.buttonText}>
+                                        &lt;Text style={styles.buttonText}>
                                             {isSaving ? 'Saving...' : 'Save'}
-                                        </Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity 
+                                        &lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;TouchableOpacity 
                                         style={[styles.button, styles.cancelButton]}
                                         onPress={() => setIsEditing(false)}
                                     >
-                                        <Text style={styles.buttonText}>Cancel</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                                        &lt;Text style={styles.buttonText}>Cancel&lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                &lt;/View>
+                            &lt;/View>
                         ) : (
-                            <View style={styles.viewSection}>
-                                <View style={styles.eventInfo}>
-                                    <Text style={styles.timeText}>
+                            &lt;View style={styles.viewSection}>
+                                &lt;View style={styles.eventInfo}>
+                                    &lt;Text style={styles.timeText}>
                                         {formatTime(event?.start_time)} - {formatTime(event?.end_time)}
-                                    </Text>
-                                    <Text style={styles.categoryText}>
+                                    &lt;/Text>
+                                    &lt;Text style={styles.categoryText}>
                                         {event?.category}
-                                    </Text>
-                                    <Text style={styles.descriptionText}>
+                                    &lt;/Text>
+                                    &lt;Text style={styles.descriptionText}>
                                         {event?.description || 'No description available'}
-                                    </Text>
-                                </View>
+                                    &lt;/Text>
+                                &lt;/View>
                                 
-                                <View style={styles.buttonContainer}>
-                                    <TouchableOpacity 
+                                &lt;View style={styles.buttonContainer}>
+                                    &lt;TouchableOpacity 
                                         style={[styles.button, styles.editButton]}
                                         onPress={() => setIsEditing(true)}
                                     >
-                                        <Text style={styles.buttonText}>Edit</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity 
+                                        &lt;Text style={styles.buttonText}>Edit&lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                    &lt;TouchableOpacity 
                                         style={[styles.button, styles.deleteButton]}
                                         onPress={() => onDelete(event?.id, event?.title)}
                                     >
-                                        <Text style={styles.buttonText}>Delete</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                                        &lt;Text style={styles.buttonText}>Delete&lt;/Text>
+                                    &lt;/TouchableOpacity>
+                                &lt;/View>
+                            &lt;/View>
                         )}
-                    </ScrollView>
-                </View>
-            </View>
-        </Modal>
+                    &lt;/ScrollView>
+                &lt;/View>
+            &lt;/View>
+        &lt;/Modal>
     );
 };
 
@@ -389,4 +417,26 @@ const styles = StyleSheet.create({
     },
 });
 
-export default EventModal;
+export default EventModal;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#CalendarDay">CalendarDay</a></li><li><a href="global.html#EventModal">EventModal</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#ScrollableEventList">ScrollableEventList</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Dec 05 2024 23:08:14 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

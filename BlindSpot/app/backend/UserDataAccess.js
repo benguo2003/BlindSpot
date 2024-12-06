@@ -3,7 +3,10 @@
 import { FIREBASE_APP, FIREBASE_DB } from "./FirebaseConfig";
 import { doc, getDoc, query, where, getDocs, updateDoc, collection } from "firebase/firestore";
 
-// get user data from the database
+/**
+ * Gets user data from Firebase database. Returns user data object or null if error.
+ * @param {string} user_id - The unique identifier for the user to look up
+*/
 export async function getUserData(user_id) {
     try {
         const userRef = doc(FIREBASE_DB, "users", user_id);

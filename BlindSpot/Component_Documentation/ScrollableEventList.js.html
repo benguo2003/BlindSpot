@@ -1,4 +1,32 @@
-import React, { useRef, useState } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: ScrollableEventList.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: ScrollableEventList.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React, { useRef, useState } from 'react';
 import { 
     View, 
     Text, 
@@ -96,7 +124,7 @@ const ScrollableEventList = ({
         const duration = endPosition - startPosition;
         const minHeight = 30;
         const displayHeight = Math.max(duration, minHeight);
-        const topAdjustment = duration < minHeight ? (minHeight - duration) / 2 : 0;
+        const topAdjustment = duration &lt; minHeight ? (minHeight - duration) / 2 : 0;
         
         return {
             top: startPosition - topAdjustment,
@@ -104,7 +132,7 @@ const ScrollableEventList = ({
             left: '2%',
             right: '2%',
             zIndex: 1,
-            borderWidth: duration < 45 ? 1 : 0,
+            borderWidth: duration &lt; 45 ? 1 : 0,
             borderColor: 'rgba(255, 255, 255, 0.5)',
         };
     };
@@ -112,8 +140,8 @@ const ScrollableEventList = ({
     const CurrentTimeLine = () => {
         const now = new Date();
         const today = new Date(selectedDate);
-        const isToday = now.getDate() === today.getDate() && 
-                       now.getMonth() === today.getMonth() && 
+        const isToday = now.getDate() === today.getDate() &amp;&amp; 
+                       now.getMonth() === today.getMonth() &amp;&amp; 
                        now.getFullYear() === today.getFullYear();
         
         if (!isToday) return null;
@@ -121,7 +149,7 @@ const ScrollableEventList = ({
         const minutes = now.getHours() * 60 + now.getMinutes();
     
         return (
-            <View
+            &lt;View
                 style={{
                     position: 'absolute',
                     top: minutes,
@@ -138,39 +166,39 @@ const ScrollableEventList = ({
     const renderEvent = (event, index) => {
         if (!event) return null;
         return (
-            <TouchableOpacity
+            &lt;TouchableOpacity
                 key={index}
-                onPress={() => onEventPress && onEventPress(event)}
+                onPress={() => onEventPress &amp;&amp; onEventPress(event)}
             >
-                <LinearGradient
+                &lt;LinearGradient
                     colors={getEventColors(event.event_category, event.priority)}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={[styles.eventCard, getEventPositionStyle(event)]}
                 >
-                    <View style={styles.eventContent}>
-                        <Text style={styles.eventTitle}>{event.event_title}</Text>
-                        <Text style={styles.eventTime}>
+                    &lt;View style={styles.eventContent}>
+                        &lt;Text style={styles.eventTitle}>{event.event_title}&lt;/Text>
+                        &lt;Text style={styles.eventTime}>
                             {formatTime(event.start_time)} - {formatTime(event.end_time)}
-                        </Text>
-                    </View>
-                </LinearGradient>
-            </TouchableOpacity>
+                        &lt;/Text>
+                    &lt;/View>
+                &lt;/LinearGradient>
+            &lt;/TouchableOpacity>
         );
     };
 
     return (
-        <View style={[styles.container, containerStyle, { backgroundColor }]}>
+        &lt;View style={[styles.container, containerStyle, { backgroundColor }]}>
             {isLoading ? (
-                <Text style={styles.statusMessage}>Loading events...</Text>
+                &lt;Text style={styles.statusMessage}>Loading events...&lt;/Text>
             ) : events.length === 0 ? (
-                <Text style={styles.statusMessage}>No events for this day</Text>
+                &lt;Text style={styles.statusMessage}>No events for this day&lt;/Text>
             ) : null}
-            <ScrollView 
+            &lt;ScrollView 
                 ref={scrollViewRef}
                 style={styles.timelineContainer}
                 refreshControl={
-                    <RefreshControl
+                    &lt;RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
                         tintColor="#6A0DAD"
@@ -179,8 +207,8 @@ const ScrollableEventList = ({
                     />
                 }
             >
-                <View style={styles.timelineContent}>
-                    <View style={styles.timeIndicators}>
+                &lt;View style={styles.timelineContent}>
+                    &lt;View style={styles.timeIndicators}>
                         {timeSlots.map((time, index) => {
                             const date = new Date(time);
                             const hours = date.getHours();
@@ -188,22 +216,22 @@ const ScrollableEventList = ({
                             const hours12 = hours % 12 || 12;
                             
                             return (
-                                <View key={index} style={styles.timeSlot}>
-                                    <Text style={styles.timeText}>
+                                &lt;View key={index} style={styles.timeSlot}>
+                                    &lt;Text style={styles.timeText}>
                                         {`${hours12}:00 ${ampm}`}
-                                    </Text>
-                                    <View style={styles.timeLine} />
-                                </View>
+                                    &lt;/Text>
+                                    &lt;View style={styles.timeLine} />
+                                &lt;/View>
                             );
                         })}
-                    </View>
-                    <View style={styles.eventsContainer}>
-                        <CurrentTimeLine />
+                    &lt;/View>
+                    &lt;View style={styles.eventsContainer}>
+                        &lt;CurrentTimeLine />
                         {events.map(renderEvent)}
-                    </View>
-                </View>
-            </ScrollView>
-        </View>
+                    &lt;/View>
+                &lt;/View>
+            &lt;/ScrollView>
+        &lt;/View>
     );
 };
 
@@ -310,4 +338,26 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ScrollableEventList;
+export default ScrollableEventList;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#CalendarDay">CalendarDay</a></li><li><a href="global.html#EventModal">EventModal</a></li><li><a href="global.html#Navbar">Navbar</a></li><li><a href="global.html#ScrollableEventList">ScrollableEventList</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Dec 05 2024 23:08:14 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

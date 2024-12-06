@@ -1,7 +1,12 @@
 import { FIREBASE_APP, FIREBASE_DB } from "./FirebaseConfig";
 import { doc, getDoc,updateDoc} from "firebase/firestore";
 
-//age is an int, rest are stings
+/**
+ * Updates a user's profile in Firebase. Returns true if successful.
+ * @param {string} user_id - The unique identifier for the current user
+ * @param {number} age - User's age in years
+ * @param {string} name - User's name
+*/
 async function updateProfile(user_id, age, name){
     try{
         const userRef = doc(FIREBASE_DB, 'users', user_id);
@@ -16,6 +21,11 @@ async function updateProfile(user_id, age, name){
     }
 }
 
+/**
+ * Updates a user's profile with a user object. Returns true if successful.
+ * @param {string} user_id - The unique identifier for the current user
+ * @param {Object} userObj - Object containing user profile fields to update
+*/
 async function updateProfileObject(user_id, userObj){
     try{
         const userRef = doc(FIREBASE_DB, 'users', user_id);
@@ -29,7 +39,10 @@ async function updateProfileObject(user_id, userObj){
     }
 }
 
-//user id as string 
+/**
+ * Retrieves a user's information from Firebase. Returns user data object or null if error.
+ * @param {string} user_id - The unique identifier for the current user
+*/
 async function retrieveInfo(user_id) {
     try {
         const userRef = doc(FIREBASE_DB, 'users', user_id);
