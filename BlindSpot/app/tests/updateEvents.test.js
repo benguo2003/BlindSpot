@@ -3,7 +3,6 @@
 import {
     updateEvent,
     updateTitle,
-    updateRecurrence,
     updateTime,
     updateDescription,
     updateLocation,
